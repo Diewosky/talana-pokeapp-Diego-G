@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -30,40 +31,57 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.talana_poke_app.presentation.auth.AuthViewModel
 
 @Composable
 fun PokemonListScreen(
     modifier: Modifier = Modifier,
-    pokemonViewModel: PokemonViewModel = viewModel()
+    pokemonViewModel: PokemonViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel(),
+    onSignOut: () -> Unit
 ) {
     val uiState by pokemonViewModel.uiState.collectAsState()
 
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        when {
-            uiState.isLoading -> {
-                CircularProgressIndicator()
-            }
-            uiState.error != null -> {
-                Text(
-                    text = "Error: ${uiState.error}",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-            uiState.pokemonList.isNotEmpty() -> {
-                PokemonLazyList(
-                    pokemonList = uiState.pokemonList,
-                    onFavoriteToggle = { pokemon -> pokemonViewModel.toggleFavorite(pokemon) }
-                )
-            }
-            else -> {
-                Text(
-                    text = "No Pokémon found (or still loading details).",
-                    modifier = Modifier.padding(16.dp)
-                )
+    Column(modifier = modifier) {
+        Button(
+            onClick = {
+                authViewModel.signOut()
+                onSignOut()
+            },
+            modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 0.dp)
+                .align(Alignment.End)
+        ) {
+            Text("Cerrar Sesión")
+        }
+
+        Box(
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            when {
+                uiState.isLoading -> {
+                    CircularProgressIndicator()
+                }
+                uiState.error != null -> {
+                    Text(
+                        text = "Error: ${uiState.error}",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+                uiState.pokemonList.isNotEmpty() -> {
+                    PokemonLazyList(
+                        pokemonList = uiState.pokemonList,
+                        onFavoriteToggle = { pokemon -> pokemonViewModel.toggleFavorite(pokemon) }
+                    )
+                }
+                else -> {
+                    Text(
+                        text = "No Pokémon found (or still loading details).",
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
         }
     }
@@ -125,4 +143,15 @@ fun PokemonRow(
             }
         }
     }
-} 
+}
+
+/*
+@Preview(showBackground = true)
+@Composable
+fun PokemonListScreenPreview() {
+    TalanaPokeAppTheme {
+        // Necesitarías un AuthViewModel mock/fake aquí o un PokemonViewModel mock
+        // PokemonListScreen(onSignOut = {})
+    }
+}
+*/ 

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "809267029366",
+    "project_id": "talanapokeapp",
+    "storage_bucket": "talanapokeapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:809267029366:android:fe2d1f4c94e388c4b98657",
+        "android_client_info": {
+          "package_name": "com.example.talanapokeapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "809267029366-psocq7gi8rs6u60877tu38ik784uhepq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.talanapokeapp",
+            "certificate_hash": "7bd6dd797d97b9713ed9df35a318fd6ded61b736"
+          }
+        },
+        {
+          "client_id": "809267029366-g762dg6li0q2fh2552dape8calbb90pv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAa7DQ_158_5LjNpDKjcjSm0_vB7dxJSIk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "809267029366-g762dg6li0q2fh2552dape8calbb90pv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

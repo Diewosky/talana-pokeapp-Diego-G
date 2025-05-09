@@ -8,10 +8,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.talanapokeapp.ui.theme.TalanaPokeAppTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.talana_poke_app.presentation.auth.AuthViewModel
+import com.example.talana_poke_app.presentation.auth.LoginScreen
 import com.example.talana_poke_app.presentation.pokemonlist.PokemonListScreen
+import com.example.talanapokeapp.ui.theme.TalanaPokeAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,12 +24,26 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TalanaPokeAppTheme {
+                val authViewModel: AuthViewModel = viewModel()
+                val authUiState by authViewModel.uiState.collectAsState()
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    PokemonListScreen(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize()
-                    )
+                    val screenModifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()
+
+                    if (authUiState.currentUser == null) {
+                        LoginScreen(
+                            authViewModel = authViewModel,
+                            onLoginSuccess = { }
+                        )
+                    } else {
+                        PokemonListScreen(
+                            modifier = screenModifier,
+                            authViewModel = authViewModel,
+                            onSignOut = { }
+                        )
+                    }
                 }
             }
         }
@@ -33,8 +52,8 @@ class MainActivity : ComponentActivity() {
 
 @Preview(showBackground = true)
 @Composable
-fun PokemonListScreenPreview() {
+fun DefaultAppPreview() { 
     TalanaPokeAppTheme {
-        PokemonListScreen()
+        LoginScreen(onLoginSuccess = {})
     }
 }

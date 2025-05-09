@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
+    alias(libs.plugins.google.gms.services)
 }
 
 android {
@@ -69,6 +70,11 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
 
     implementation("androidx.compose.material:material-icons-extended") // Para iconos adicionales como StarBorder
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0")) // Firebase BoM (check for latest version)
+    implementation("com.google.firebase:firebase-auth-ktx") // Firebase Authentication
+    implementation("com.google.android.gms:play-services-auth:21.2.0") // Google Sign-In (check for latest version)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
