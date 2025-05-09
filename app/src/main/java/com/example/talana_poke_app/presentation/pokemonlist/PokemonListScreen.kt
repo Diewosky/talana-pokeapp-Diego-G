@@ -13,8 +13,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,7 +54,10 @@ fun PokemonListScreen(
                 )
             }
             uiState.pokemonList.isNotEmpty() -> {
-                PokemonLazyList(pokemonList = uiState.pokemonList)
+                PokemonLazyList(
+                    pokemonList = uiState.pokemonList,
+                    onFavoriteToggle = { pokemon -> pokemonViewModel.toggleFavorite(pokemon) }
+                )
             }
             else -> {
                 Text(
@@ -64,15 +72,19 @@ fun PokemonListScreen(
 @Composable
 fun PokemonLazyList(
     pokemonList: List<PokemonDisplayItem>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onFavoriteToggle: (PokemonDisplayItem) -> Unit
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(pokemonList) { pokemon ->
-            PokemonRow(pokemon = pokemon)
+        items(pokemonList, key = { it.name }) { pokemon ->
+            PokemonRow(
+                pokemon = pokemon,
+                onFavoriteToggle = onFavoriteToggle
+            )
         }
     }
 }
@@ -80,26 +92,37 @@ fun PokemonLazyList(
 @Composable
 fun PokemonRow(
     pokemon: PokemonDisplayItem,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onFavoriteToggle: (PokemonDisplayItem) -> Unit
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             AsyncImage(
                 model = pokemon.imageUrl,
                 contentDescription = "${pokemon.name} image",
-                modifier = Modifier.size(72.dp),
+                modifier = Modifier.size(64.dp),
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = pokemon.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
-                style = MaterialTheme.typography.titleMedium
-            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = pokemon.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+            IconButton(onClick = { onFavoriteToggle(pokemon) }) {
+                Icon(
+                    imageVector = if (pokemon.isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                    contentDescription = if (pokemon.isFavorite) "Remove from favorites" else "Add to favorites",
+                    tint = if (pokemon.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 } 

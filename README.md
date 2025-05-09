@@ -1,14 +1,17 @@
 # TalanaPokeApp
 
-TalanaPokeApp es una aplicación Android sencilla construida con Kotlin y Jetpack Compose que muestra una lista de Pokémon obtenida de la [PokeAPI](https://pokeapi.co/). La aplicación carga y muestra los nombres e imágenes de los Pokémon.
+TalanaPokeApp es una aplicación Android sencilla construida con Kotlin y Jetpack Compose que muestra una lista de Pokémon obtenida de la [PokeAPI](https://pokeapi.co/). La aplicación carga y muestra los nombres e imágenes de los Pokémon, y permite marcar Pokémon como favoritos.
 
 ## Características Actuales
 
 *   Muestra una lista de los primeros 20 Pokémon.
 *   Para cada Pokémon, se muestra su nombre y su sprite (imagen) oficial.
+*   Permite marcar/desmarcar Pokémon como favoritos.
+*   El estado de favorito se guarda localmente y persiste entre sesiones de la aplicación.
 *   Interfaz de usuario construida enteramente con Jetpack Compose.
 *   Carga de datos de red utilizando Retrofit.
 *   Carga de imágenes asíncrona utilizando Coil.
+*   Persistencia de datos local utilizando Room.
 *   Arquitectura básica siguiendo patrones MVVM (Model-View-ViewModel) con un Repositorio para el acceso a datos.
 
 ## Tecnologías Utilizadas
@@ -18,7 +21,8 @@ TalanaPokeApp es una aplicación Android sencilla construida con Kotlin y Jetpac
 *   **Networking:** Retrofit (para consumir la PokeAPI)
 *   **Conversión JSON:** Gson (con Retrofit)
 *   **Carga de Imágenes:** Coil (Compose)
-*   **Componentes de Arquitectura de Android:** ViewModel, StateFlow
+*   **Persistencia Local:** Room
+*   **Componentes de Arquitectura de Android:** ViewModel (AndroidViewModel), StateFlow, Flow (Coroutines)
 *   **API:** [PokeAPI (v2)](https://pokeapi.co/api/v2/)
 
 ## Cómo Empezar
@@ -34,9 +38,13 @@ TalanaPokeApp es una aplicación Android sencilla construida con Kotlin y Jetpac
 
 *   `app/src/main/java/com/example/talanapokeapp/`
     *   `data/`
+        *   `local/`:
+            *   `entity/`: Entidades de Room (e.g., `FavoritePokemon.kt`).
+            *   `dao/`: Data Access Objects de Room (e.g., `FavoritePokemonDao.kt`).
+            *   `AppDatabase.kt`: Clase principal de la base de datos Room.
         *   `model/`: Clases de datos (data classes) para representar las respuestas de la API y los ítems de la UI.
         *   `network/`: Interfaz de servicio Retrofit (`PokeApiService`) e instancia de Retrofit (`RetrofitInstance`).
-        *   `repository/`: `PokemonRepository` para gestionar la obtención de datos.
+        *   `repository/`: `PokemonRepository` para gestionar la obtención de datos (de red y locales).
     *   `presentation/`
         *   `pokemonlist/`: Contiene el `PokemonViewModel`, `PokemonListUiState`, `PokemonDisplayItem` y los Composables de la pantalla (`PokemonListScreen.kt`).
     *   `ui/theme/`: Archivos de tema generados por Jetpack Compose.
