@@ -40,7 +40,13 @@ class PokemonViewModel(application: Application) : AndroidViewModel(application)
                         name = pokemonListItem.name,
                         imageUrl = detail?.sprites?.frontDefault,
                         detailUrl = pokemonListItem.url,
-                        isFavorite = false // Se actualizará con el combine
+                        isFavorite = false, // Será actualizado por el combine más tarde
+                        id = detail?.id,
+                        height = detail?.height,
+                        weight = detail?.weight,
+                        types = detail?.types?.map { it.type.name.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase() else char.toString() } },
+                        abilities = detail?.abilities?.map { it.ability.name.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase() else char.toString() } },
+                        stats = detail?.stats?.map { Pair(it.stat.name.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase() else char.toString() }, it.baseStat) }
                     )
                 }
             }
