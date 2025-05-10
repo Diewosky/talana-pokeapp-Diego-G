@@ -142,6 +142,13 @@ fun PokemonListScreen(
     }
 
     if (showDetailDialog && selectedPokemonForDialog != null) {
+        // Registrar que se ha visto un detalle de Pokémon
+        LaunchedEffect(selectedPokemonForDialog) {
+            selectedPokemonForDialog?.let {
+                pokemonViewModel.onPokemonDetailViewed(it)
+            }
+        }
+        
         PokemonDetailDialog(
             pokemon = selectedPokemonForDialog!!,
             onDismissRequest = { showDetailDialog = false }

@@ -13,7 +13,7 @@ import com.example.talana_poke_app.data.local.entity.PokemonCache
 
 @Database(
     entities = [FavoritePokemon::class, PokemonCache::class], 
-    version = 2, 
+    version = 3, 
     exportSchema = false
 )
 @TypeConverters(PokemonTypeConverter::class)

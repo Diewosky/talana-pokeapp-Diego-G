@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.talana_poke_app.data.local.AppDatabase
 import com.example.talana_poke_app.data.model.PokemonListItem
 import com.example.talana_poke_app.data.repository.PokemonRepository
+import com.example.talana_poke_app.data.repository.UsageStatsRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
 class PokemonViewModel(application: Application) : AndroidViewModel(application) {
 
     private val pokemonRepository: PokemonRepository
+    private val usageStatsRepository: UsageStatsRepository
     private val _currentListType = MutableStateFlow(PokemonListType.ALL) // Default or initial type
 
     private val _uiState = MutableStateFlow(PokemonListUiState(isLoading = true))
@@ -24,6 +26,13 @@ class PokemonViewModel(application: Application) : AndroidViewModel(application)
     
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _userId = MutableStateFlow<String?>(null)
+    val userId: StateFlow<String?> = _userId.asStateFlow()
+    fun setUserId(newUserId: String?) {
+        _userId.value = newUserId
+        observePokemonData() // Reiniciar el flujo cuando cambia el usuario
+    }
 
     init {
         val database = AppDatabase.getDatabase(application)
@@ -34,7 +43,10 @@ class PokemonViewModel(application: Application) : AndroidViewModel(application)
             favoritePokemonDao = favoritePokemonDao,
             pokemonCacheDao = pokemonCacheDao
         )
-        observePokemonData()
+        
+        usageStatsRepository = UsageStatsRepository.getInstance(application)
+        
+        // No iniciar el flujo aquí, esperar a tener userId
     }
 
     fun loadPokemons(listType: PokemonListType) {
@@ -45,40 +57,41 @@ class PokemonViewModel(application: Application) : AndroidViewModel(application)
         _searchQuery.value = query
     }
 
+    private var observeJob: kotlinx.coroutines.Job? = null
     private fun observePokemonData() {
-        viewModelScope.launch {
+        observeJob?.cancel()
+        val userId = _userId.value ?: return
+        observeJob = viewModelScope.launch {
             val pokemonDataFlow = _currentListType.flatMapLatest { type ->
-                _uiState.update { it.copy(isLoading = true, error = null, pokemonList = emptyList()) } // Reset on type change
+                _uiState.update { it.copy(isLoading = true, error = null, pokemonList = emptyList()) }
                 when (type) {
                     PokemonListType.ALL -> fetchAllPokemonFromApi()
-                    PokemonListType.FAVORITES -> fetchFavoritePokemonDetails()
+                    PokemonListType.FAVORITES -> fetchFavoritePokemonDetails(userId)
                 }
             }.catch { e ->
                 Log.e("PokemonViewModel", "Error in pokemonDataFlow", e)
                 _uiState.update { it.copy(isLoading = false, error = e.message ?: "Error fetching data", pokemonList = emptyList()) }
             }
-            .combine(pokemonRepository.getAllFavoritePokemons().catch { emit(emptyList()) }) { displayItems, dbFavorites ->
+            .combine(pokemonRepository.getAllFavoritePokemons(userId).catch { emit(emptyList()) }) { displayItems, dbFavorites ->
                 val favoriteNames = dbFavorites.map { it.name }.toSet()
                 val updatedList = displayItems.map {
                     it.copy(isFavorite = favoriteNames.contains(it.name))
                 }
                 updatedList
             }
-            
-            // Combinar con la búsqueda
             pokemonDataFlow.combine(_searchQuery) { pokemonList, searchTerm ->
                 if (searchTerm.isBlank()) {
                     pokemonList
                 } else {
-                    pokemonList.filter { 
-                        it.name.contains(searchTerm, ignoreCase = true) 
+                    pokemonList.filter {
+                        it.name.contains(searchTerm, ignoreCase = true)
                     }
                 }
             }
             .collect { filteredList ->
                 _uiState.update {
                     it.copy(
-                        isLoading = false, // Loading is handled before this combine
+                        isLoading = false,
                         pokemonList = filteredList,
                         error = if (filteredList.isEmpty() && !it.isLoading) {
                             if (_searchQuery.value.isNotBlank()) "No se encontraron resultados para: ${_searchQuery.value}" else "No Pokémon found."
@@ -106,15 +119,16 @@ class PokemonViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    private fun fetchFavoritePokemonDetails(): Flow<List<PokemonDisplayItem>> {
-        return pokemonRepository.getAllFavoritePokemons()
+    private fun fetchFavoritePokemonDetails(userId: String): Flow<List<PokemonDisplayItem>> {
+        return pokemonRepository.getAllFavoritePokemons(userId)
             .map { favoriteList ->
-                // Procesar favoritos en paralelo
+                usageStatsRepository.syncFavoritesCount(favoriteList.size)
+                
                 favoriteList.map { favoritePokemon ->
                     viewModelScope.async {
                         mapToDisplayItem(
-                            PokemonListItem(favoritePokemon.name, favoritePokemon.detailUrl), 
-                            favoritePokemon.detailUrl, 
+                            PokemonListItem(favoritePokemon.name, favoritePokemon.detailUrl),
+                            favoritePokemon.detailUrl,
                             favoritePokemon.imageUrl
                         )
                     }
@@ -139,17 +153,26 @@ class PokemonViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun toggleFavorite(pokemon: PokemonDisplayItem) {
+        val userId = _userId.value ?: return
         viewModelScope.launch {
             try {
                 if (pokemon.isFavorite) {
-                    pokemonRepository.removePokemonFromFavorites(pokemon.name)
+                    pokemonRepository.removePokemonFromFavorites(userId, pokemon.name)
+                    usageStatsRepository.decrementPokemonFavorited()
                 } else {
-                    pokemonRepository.addPokemonToFavorites(pokemon)
+                    pokemonRepository.addPokemonToFavorites(userId, pokemon)
+                    usageStatsRepository.incrementPokemonFavorited()
                 }
             } catch (e: Exception) {
                 Log.e("PokemonViewModel", "Error toggling favorite", e)
                 _uiState.update { it.copy(error = "Error updating favorite status") }
             }
+        }
+    }
+    
+    fun onPokemonDetailViewed(pokemon: PokemonDisplayItem) {
+        viewModelScope.launch {
+            usageStatsRepository.incrementPokemonViewed()
         }
     }
 } 

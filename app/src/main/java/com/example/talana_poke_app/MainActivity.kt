@@ -24,11 +24,15 @@ import com.example.talana_poke_app.presentation.navigation.Screen
 import com.example.talana_poke_app.presentation.pokemonlist.PokemonListScreen
 import com.example.talana_poke_app.presentation.pokemonlist.PokemonListType
 import com.example.talana_poke_app.presentation.pokemonlist.PokemonViewModel
+import com.example.talana_poke_app.presentation.stats.StatsScreen
+import com.example.talana_poke_app.presentation.stats.UsageStatsViewModel
 import com.example.talana_poke_app.ui.theme.TalanaPokeAppTheme
+import androidx.compose.runtime.LaunchedEffect
 
 class MainActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModels()
     private val pokemonViewModel: PokemonViewModel by viewModels() // PokemonViewModel might be scoped differently later
+    private val usageStatsViewModel: UsageStatsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +45,19 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     val authState by authViewModel.uiState.collectAsState()
+
+                    // Observar cambios en el estado de autenticación
+                    LaunchedEffect(authState.currentUser) {
+                        if (authState.currentUser != null) {
+                            // Cargar estadísticas del usuario cuando inicia sesión
+                            usageStatsViewModel.loadUserStats(authState.currentUser!!.uid)
+                            pokemonViewModel.setUserId(authState.currentUser!!.uid)
+                        } else {
+                            // Limpiar estadísticas cuando cierra sesión
+                            usageStatsViewModel.clearCurrentUserStats()
+                            pokemonViewModel.setUserId(null)
+                        }
+                    }
 
                     NavHost(
                         navController = navController,
@@ -76,6 +93,13 @@ class MainActivity : ComponentActivity() {
                                 navController = navController,
                                 pokemonViewModel = pokemonViewModel,
                                 listType = listType
+                            )
+                        }
+
+                        composable(route = Screen.Stats.route) {
+                            StatsScreen(
+                                navController = navController,
+                                usageStatsViewModel = usageStatsViewModel
                             )
                         }
                     }

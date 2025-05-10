@@ -13,12 +13,12 @@ interface FavoritePokemonDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addFavorite(favoritePokemon: FavoritePokemon)
 
-    @Query("DELETE FROM favorite_pokemon_table WHERE name = :pokemonName")
-    suspend fun removeFavorite(pokemonName: String)
+    @Query("DELETE FROM favorite_pokemon_table WHERE userId = :userId AND name = :pokemonName")
+    suspend fun removeFavorite(userId: String, pokemonName: String)
 
-    @Query("SELECT EXISTS(SELECT 1 FROM favorite_pokemon_table WHERE name = :pokemonName LIMIT 1)")
-    fun isFavorite(pokemonName: String): Flow<Boolean>
+    @Query("SELECT EXISTS(SELECT 1 FROM favorite_pokemon_table WHERE userId = :userId AND name = :pokemonName LIMIT 1)")
+    fun isFavorite(userId: String, pokemonName: String): Flow<Boolean>
 
-    @Query("SELECT * FROM favorite_pokemon_table ORDER BY name ASC")
-    fun getAllFavorites(): Flow<List<FavoritePokemon>>
+    @Query("SELECT * FROM favorite_pokemon_table WHERE userId = :userId ORDER BY name ASC")
+    fun getAllFavorites(userId: String): Flow<List<FavoritePokemon>>
 } 

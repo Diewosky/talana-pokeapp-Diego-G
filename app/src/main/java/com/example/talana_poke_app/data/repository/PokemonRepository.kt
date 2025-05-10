@@ -138,16 +138,17 @@ class PokemonRepository(
     }
 
     // Funciones para Favoritos
-    fun isPokemonFavorite(pokemonName: String): Flow<Boolean> {
-        return favoritePokemonDao.isFavorite(pokemonName)
+    fun isPokemonFavorite(userId: String, pokemonName: String): Flow<Boolean> {
+        return favoritePokemonDao.isFavorite(userId, pokemonName)
     }
 
-    fun getAllFavoritePokemons(): Flow<List<FavoritePokemon>> {
-        return favoritePokemonDao.getAllFavorites()
+    fun getAllFavoritePokemons(userId: String): Flow<List<FavoritePokemon>> {
+        return favoritePokemonDao.getAllFavorites(userId)
     }
 
-    suspend fun addPokemonToFavorites(pokemon: PokemonDisplayItem) {
+    suspend fun addPokemonToFavorites(userId: String, pokemon: PokemonDisplayItem) {
         val favorite = FavoritePokemon(
+            userId = userId,
             name = pokemon.name,
             detailUrl = pokemon.detailUrl,
             imageUrl = pokemon.imageUrl
@@ -155,7 +156,7 @@ class PokemonRepository(
         favoritePokemonDao.addFavorite(favorite)
     }
 
-    suspend fun removePokemonFromFavorites(pokemonName: String) {
-        favoritePokemonDao.removeFavorite(pokemonName)
+    suspend fun removePokemonFromFavorites(userId: String, pokemonName: String) {
+        favoritePokemonDao.removeFavorite(userId, pokemonName)
     }
 } 

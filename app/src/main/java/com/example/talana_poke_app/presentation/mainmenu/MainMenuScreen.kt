@@ -117,6 +117,30 @@ fun MainMenuScreen(
                     )
                 )
             }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Botón Estadísticas
+            Button(
+                onClick = {
+                    navController.navigate(Screen.Stats.route)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = PokemonBlue
+                )
+            ) {
+                Text(
+                    "Estadísticas de Uso",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
 
             Spacer(modifier = Modifier.height(60.dp))
 
