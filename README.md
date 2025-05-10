@@ -31,6 +31,7 @@ Uno de los principales desafíos propuestos fue crear un feed dinámico eficient
 - **Autenticación:** Integración con Firebase Authentication y Google Sign-In
 - **Características avanzadas:**
   - Buscador de Pokémon con resultados en tiempo real
+  - Filtros por tipo de Pokémon con interfaz visual
   - Sistema avanzado de estadísticas de usuario
   - Modo oscuro adaptativo
   - Caché inteligente con tiempo de expiración
@@ -43,6 +44,7 @@ Uno de los principales desafíos propuestos fue crear un feed dinámico eficient
 - **Favoritos personalizados**: Marca y guarda tus Pokémon favoritos por usuario
 - **Estadísticas de uso**: Seguimiento detallado de tu actividad en la app
 - **Buscador inteligente**: Encuentra fácilmente cualquier Pokémon por nombre
+- **Filtros por tipo**: Filtra Pokémon por cualquiera de los 18 tipos disponibles
 
 ### Detalles de implementación de funcionalidades
 - **Catálogo Pokémon**: Implementado con paginación para carga eficiente de datos desde PokeAPI
@@ -50,6 +52,7 @@ Uno de los principales desafíos propuestos fue crear un feed dinámico eficient
 - **Gestión de favoritos**: Sincronización en tiempo real entre Firestore y caché local
 - **Panel de estadísticas**: Gráficos interactivos con visualización de datos personalizados
 - **Motor de búsqueda**: Filtrado instantáneo con resultados predictivos
+- **Sistema de filtros**: Chips interactivos para filtrar por tipo con feedback visual inmediato
 
 ### Características técnicas
 - **UI moderna con Jetpack Compose**: Interfaz fluida y reactiva
@@ -132,6 +135,13 @@ app/
 
 ## 🚀 Recientes mejoras
 
+### Sistema avanzado de filtros
+- **Filtrado por tipo de Pokémon**: Implementado mediante chips interactivos
+- **Chips con colores representativos**: Cada tipo de Pokémon tiene su propio color distintivo
+- **Combinación de filtros**: Posibilidad de combinar búsqueda por texto y filtro por tipo
+- **Experiencia de usuario mejorada**: Selección/deselección intuitiva con feedback visual
+- **Diseño pixelado**: Manteniendo la coherencia estética con el resto de la aplicación
+
 ### Optimización de rendimiento
 - Caché local con tiempo de expiración para reducir llamadas a la API
 - Procesamiento paralelo de datos con Coroutines
@@ -187,6 +197,7 @@ cd TalanaPokeApp
 El código fuente principal de la aplicación se encuentra bajo el paquete `com.example.talana_poke_app`.
 
 ## 🔜 Próximas características
+- Implementación de GraphQL para consultas optimizadas a la API
 - Implementación de Paging 3 para carga infinita
 - Soporte para notificaciones push
 - Modo sin conexión mejorado
@@ -216,11 +227,13 @@ Para abordar este desafío, seguí un proceso iterativo centrado en la funcional
 - **Rendimiento del feed**: Resuelto mediante arquitectura optimizada y técnicas avanzadas de Compose
 - **Gestión de estado**: Implementación de flujos de datos unidireccionales con StateFlow
 - **Sincronización offline/online**: Sistema de caché inteligente con Room y políticas de actualización
+- **Sistema de filtrado complejo**: Implementación de filtros combinados (texto + tipo) manteniendo el rendimiento
 
 ### Lecciones aprendidas
 - La importancia de arquitecturas limpias para mantener el código escalable
 - Ventajas de Jetpack Compose para resolver problemas clásicos de rendimiento en UI complejas
 - Valor de las buenas prácticas como inyección de dependencias para testing y mantenibilidad
+- Importancia del diseño de UX para funcionalidades de filtrado intuitivas
 
 ## 📊 Métricas y resultados
 
