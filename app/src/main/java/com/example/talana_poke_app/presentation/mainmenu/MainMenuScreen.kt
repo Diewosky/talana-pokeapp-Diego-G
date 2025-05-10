@@ -1,5 +1,6 @@
 package com.example.talana_poke_app.presentation.mainmenu
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,9 +31,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -39,6 +47,7 @@ import com.example.talana_poke_app.presentation.navigation.Screen
 import com.example.talana_poke_app.presentation.pokemonlist.PokemonListType
 import com.example.talana_poke_app.ui.theme.PokemonBlue
 import com.example.talana_poke_app.ui.theme.PokemonRed
+import com.example.talana_poke_app.ui.theme.PokemonYellow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,20 +56,86 @@ fun MainMenuScreen(
     authViewModel: AuthViewModel
 ) {
     val authState by authViewModel.uiState.collectAsState()
+    val userName = authState.currentUser?.displayName ?: authState.currentUser?.email ?: "Entrenador"
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { 
-                    Text(
-                        "Menú Principal", 
-                        fontWeight = FontWeight.Bold
-                    ) 
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = PokemonRed
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(PokemonRed)
+                    .padding(vertical = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "¡Bienvenido!",
+                    color = Color.White,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
-            )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Nombre de usuario con estilo pixelado
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal =
+                        12.dp, vertical = 4.dp)
+                        .border(
+                            width = 4.dp,
+                            color = Color.Black,
+                            shape = RoundedCornerShape(0.dp)
+                        )
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(0.dp),
+                            spotColor = Color.Black
+                        )
+                        .background(Color.White)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val annotatedString = buildAnnotatedString {
+                        for (i in userName.indices) {
+                            val char = userName[i].toString()
+                            val color = when {
+                                i % 3 == 0 -> PokemonRed
+                                i % 3 == 1 -> PokemonBlue
+                                else -> PokemonYellow
+                            }
+                            
+                            withStyle(
+                                style = SpanStyle(
+                                    color = color,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 22.sp,
+                                    letterSpacing = 2.sp,
+                                    background = Color.White
+                                )
+                            ) {
+                                append(char)
+                            }
+                        }
+                    }
+                    
+                    Text(
+                        text = annotatedString,
+                        modifier = Modifier
+                            .drawBehind {
+                                // Líneas horizontales para efecto pixelado
+                                for (y in 0..size.height.toInt() step 4) {
+                                    drawLine(
+                                        color = Color.Black.copy(alpha = 0.05f),
+                                        start = Offset(0f, y.toFloat()),
+                                        end = Offset(size.width, y.toFloat()),
+                                        strokeWidth = 1f
+                                    )
+                                }
+                            }
+                    )
+                }
+            }
         }
     ) { paddingValues ->
         Column(
@@ -71,14 +146,6 @@ fun MainMenuScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "Bienvenido, ${authState.currentUser?.displayName ?: authState.currentUser?.email ?: "Usuario"}",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                modifier = Modifier.padding(bottom = 32.dp)
-            )
-
             // Botón Todos los Pokémon
             PixelatedButton(
                 onClick = {
