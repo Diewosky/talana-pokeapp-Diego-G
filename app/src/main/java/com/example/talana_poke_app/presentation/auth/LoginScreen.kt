@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-// import androidx.compose.foundation.layout.size // No se usa directamente aquí
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,10 +21,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-// import androidx.compose.ui.platform.LocalContext // No se usa directamente aquí
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel 
-// import com.google.android.gms.common.SignInButton // Comentado por ahora
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.talana_poke_app.ui.theme.PokemonRed
+import com.example.talana_poke_app.ui.theme.PokemonYellow
 
 @Composable
 fun LoginScreen(
@@ -30,7 +34,6 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit // Callback para navegar después del login exitoso
 ) {
     val uiState by authViewModel.uiState.collectAsState()
-    // val context = LocalContext.current // No se necesita si el signInIntent se obtiene del ViewModel
 
     // ActivityResultLauncher para el intent de Google Sign-In
     val googleSignInLauncher = rememberLauncherForActivityResult(
@@ -56,27 +59,63 @@ fun LoginScreen(
         }
     }
 
+    // Contenido principal
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Bienvenido a TalanaPokeApp", style = MaterialTheme.typography.headlineSmall)
-        Spacer(modifier = Modifier.height(32.dp))
+        // Logo o título
+        Text(
+            "Talana PokéApp", 
+            style = MaterialTheme.typography.displayMedium.copy(
+                fontWeight = FontWeight.Bold
+            )
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            "Explora el mundo Pokémon", 
+            style = MaterialTheme.typography.titleMedium
+        )
+        
+        Spacer(modifier = Modifier.height(64.dp))
 
-        if (uiState.isLoading && !uiState.googleSignInTriggered) { // Mostrar CircularProgress si está cargando PERO no esperando el intent
-            CircularProgressIndicator()
+        if (uiState.isLoading && !uiState.googleSignInTriggered) {
+            CircularProgressIndicator(
+                color = PokemonYellow
+            )
         } else {
-            Button(onClick = { authViewModel.triggerGoogleSignIn() }) {
-                Text("Iniciar sesión con Google")
+            // Botón normal de login
+            Button(
+                onClick = { authViewModel.triggerGoogleSignIn() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = PokemonRed
+                )
+            ) {
+                Text(
+                    "Iniciar sesión con Google",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
             }
         }
 
         uiState.error?.let { error ->
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = error, color = MaterialTheme.colorScheme.error)
+            Text(
+                text = error, 
+                color = MaterialTheme.colorScheme.error
+            )
         }
     }
 } 

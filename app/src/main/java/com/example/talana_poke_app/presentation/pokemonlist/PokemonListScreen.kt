@@ -1,5 +1,6 @@
 package com.example.talana_poke_app.presentation.pokemonlist
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,6 +33,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.talana_poke_app.ui.theme.*
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -225,43 +228,121 @@ fun PokemonRow(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onPokemonClick(pokemon) },
+            .clickable { onPokemonClick(pokemon) }
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            AsyncImage(
-                model = pokemon.imageUrl,
-                contentDescription = "${pokemon.name} image",
-                modifier = Modifier.size(64.dp),
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = pokemon.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
-                    style = MaterialTheme.typography.titleMedium
+            // Fondo circular para la imagen del Pokémon
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(50)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = pokemon.imageUrl,
+                    contentDescription = "${pokemon.name} image",
+                    modifier = Modifier.size(60.dp),
                 )
             }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = pokemon.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                
+                // Añadir tipos si están disponibles
+                pokemon.types?.let { types ->
+                    if (types.isNotEmpty()) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            types.take(2).forEach { type ->
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            color = getTypeColor(type).copy(alpha = 0.8f),
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = type,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
             IconButton(onClick = { onFavoriteToggle(pokemon) }) {
                 Icon(
                     imageVector = if (pokemon.isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
                     contentDescription = if (pokemon.isFavorite) "Remove from favorites" else "Add to favorites",
-                    tint = if (pokemon.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = if (pokemon.isFavorite) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }
     }
 }
 
+// Función para obtener color según el tipo de Pokémon
 @Composable
-fun Chip(label: String, modifier: Modifier = Modifier) {
+fun getTypeColor(type: String): Color {
+    return when (type.lowercase()) {
+        "normal" -> TypeNormal
+        "fire" -> TypeFire
+        "water" -> TypeWater
+        "electric" -> TypeElectric
+        "grass" -> TypeGrass
+        "ice" -> TypeIce
+        "fighting" -> TypeFighting
+        "poison" -> TypePoison
+        "ground" -> TypeGround
+        "flying" -> TypeFlying
+        "psychic" -> TypePsychic
+        "bug" -> TypeBug
+        "rock" -> TypeRock
+        "ghost" -> TypeGhost
+        "dragon" -> TypeDragon
+        "dark" -> TypeDark
+        "steel" -> TypeSteel
+        "fairy" -> TypeFairy
+        else -> MaterialTheme.colorScheme.secondaryContainer
+    }
+}
+
+@Composable
+fun Chip(
+    label: String, 
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.secondaryContainer
+) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        color = color,
+        contentColor = Color.White,
         tonalElevation = 1.dp
     ) {
         Text(
@@ -282,7 +363,7 @@ fun PokemonDetailDialog(
             modifier = Modifier
                 .fillMaxWidth(0.95f)
                 .fillMaxHeight(0.8f),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             tonalElevation = 8.dp
         ) {
@@ -292,85 +373,283 @@ fun PokemonDetailDialog(
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                AsyncImage(
-                    model = pokemon.imageUrl,
-                    contentDescription = "${pokemon.name} image",
-                    modifier = Modifier.size(128.dp)
-                )
-
-                Text(
-                    text = pokemon.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
-                    style = MaterialTheme.typography.headlineMedium
-                )
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.padding(vertical = 4.dp)
+                // Encabezado con imagen y nombre
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp, bottom = 8.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    pokemon.height?.let { Text("Altura: ${it / 10.0} m", style = MaterialTheme.typography.bodyLarge) }
-                    pokemon.weight?.let { Text("Peso: ${it / 10.0} kg", style = MaterialTheme.typography.bodyLarge) }
-                }
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-                pokemon.types?.let { types ->
-                    if (types.isNotEmpty()) {
-                        Text("Tipos:", style = MaterialTheme.typography.titleSmall, modifier = Modifier.align(Alignment.Start).padding(top = 4.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Fondo circular para la imagen
+                        Box(
+                            modifier = Modifier
+                                .size(140.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(70)
+                                ),
+                            contentAlignment = Alignment.Center
                         ) {
-                            types.forEach { typeName -> Chip(label = typeName) }
+                            AsyncImage(
+                                model = pokemon.imageUrl,
+                                contentDescription = "${pokemon.name} image",
+                                modifier = Modifier.size(120.dp)
+                            )
                         }
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                    }
-                }
 
-                pokemon.abilities?.let { abilities ->
-                     if (abilities.isNotEmpty()) {
-                        Text("Habilidades:", style = MaterialTheme.typography.titleSmall, modifier = Modifier.align(Alignment.Start).padding(top = 4.dp))
-                        Column(modifier = Modifier.fillMaxWidth().padding(start = 8.dp, top = 4.dp, bottom = 4.dp), horizontalAlignment = Alignment.Start) {
-                            abilities.forEach { abilityName ->
-                                Text("• $abilityName", style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            text = pokemon.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        
+                        // Fila con tipos de Pokémon
+                        pokemon.types?.let { types ->
+                            if (types.isNotEmpty()) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.padding(top = 4.dp)
+                                ) {
+                                    types.forEach { typeName -> 
+                                        Chip(
+                                            label = typeName,
+                                            color = getTypeColor(typeName)
+                                        )
+                                    }
+                                }
                             }
                         }
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     }
                 }
 
+                HorizontalDivider()
+
+                // Información básica
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Información básica", 
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier.padding(top = 4.dp)
+                        ) {
+                            pokemon.height?.let { 
+                                InfoItem(
+                                    title = "Altura",
+                                    value = "${it / 10.0} m",
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            pokemon.weight?.let { 
+                                InfoItem(
+                                    title = "Peso",
+                                    value = "${it / 10.0} kg",
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                        
+                        // Estado de favorito
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(top = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (pokemon.isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                                contentDescription = "Favorite status",
+                                tint = if (pokemon.isFavorite) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = if (pokemon.isFavorite) "Favorito" else "No es favorito",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    }
+                }
+
+                // Habilidades
+                pokemon.abilities?.let { abilities ->
+                    if (abilities.isNotEmpty()) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = "Habilidades", 
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                
+                                Column(
+                                    modifier = Modifier.padding(start = 8.dp, top = 4.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    abilities.forEach { abilityName ->
+                                        Text(
+                                            text = "• $abilityName",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Estadísticas
                 pokemon.stats?.let { stats ->
                     if (stats.isNotEmpty()) {
-                        Text("Estadísticas Base:", style = MaterialTheme.typography.titleSmall, modifier = Modifier.align(Alignment.Start).padding(top = 4.dp))
-                        Column(modifier = Modifier.fillMaxWidth().padding(start = 8.dp, top = 4.dp, bottom = 4.dp), horizontalAlignment = Alignment.Start) {
-                            stats.forEach { (statName, statValue) ->
-                                Text("• $statName: $statValue", style = MaterialTheme.typography.bodyMedium)
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Text(
+                                    text = "Estadísticas Base", 
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    stats.forEach { (statName, statValue) ->
+                                        StatBar(
+                                            statName = statName,
+                                            statValue = statValue
+                                        )
+                                    }
+                                }
                             }
                         }
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     }
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-                    Icon(
-                        imageVector = if (pokemon.isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                        contentDescription = "Favorite status",
-                        tint = if (pokemon.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = if (pokemon.isFavorite) "Favorito" else "No es favorito",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
                 }
 
                 Spacer(modifier = Modifier.weight(1f, fill = false))
 
-                Button(onClick = onDismissRequest, modifier = Modifier.fillMaxWidth()) {
-                    Text("Cerrar")
+                // Botón cerrar
+                Button(
+                    onClick = onDismissRequest,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text(
+                        "Cerrar",
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun InfoItem(title: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Composable
+fun StatBar(statName: String, statValue: Int, maxValue: Int = 255) {
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = statName,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = statValue.toString(),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(4.dp))
+        
+        // Barra de progreso
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(4.dp)
+                )
+        ) {
+            // Calculamos el porcentaje del valor respecto al máximo
+            val percentage = (statValue.toFloat() / maxValue).coerceIn(0f, 1f)
+            
+            // Color de la barra según el valor
+            val barColor = when {
+                statValue < 50 -> Color(0xFFFF5252) // Rojo para valores bajos
+                statValue < 100 -> Color(0xFFFFB74D) // Naranja para valores medios
+                else -> Color(0xFF66BB6A) // Verde para valores altos
+            }
+            
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(percentage)
+                    .background(
+                        color = barColor,
+                        shape = RoundedCornerShape(4.dp)
+                    )
+            )
         }
     }
 }
