@@ -5,6 +5,7 @@ plugins {
     id("kotlin-kapt")
     alias(libs.plugins.google.gms.services)
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.0"
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -81,6 +82,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
     implementation(libs.androidx.navigation.compose) // Jetpack Navigation Compose
+
+    // Hilt
+    implementation("com.google.dagger:hilt-android:2.48")
+    kapt("com.google.dagger:hilt-compiler:2.48")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -27,8 +28,9 @@ import com.example.talana_poke_app.presentation.pokemonlist.PokemonViewModel
 import com.example.talana_poke_app.presentation.stats.StatsScreen
 import com.example.talana_poke_app.presentation.stats.UsageStatsViewModel
 import com.example.talana_poke_app.ui.theme.TalanaPokeAppTheme
-import androidx.compose.runtime.LaunchedEffect
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModels()
     private val pokemonViewModel: PokemonViewModel by viewModels() // PokemonViewModel might be scoped differently later

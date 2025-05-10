@@ -2,20 +2,24 @@ package com.example.talana_poke_app.presentation.stats
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.talana_poke_app.data.model.UsageStats
 import com.example.talana_poke_app.data.repository.UsageStatsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel para manejar las estadísticas de uso de la aplicación
  */
-class UsageStatsViewModel(application: Application) : AndroidViewModel(application) {
-    
-    private val usageStatsRepository = UsageStatsRepository.getInstance(application)
+@HiltViewModel
+class UsageStatsViewModel @Inject constructor(
+    private val usageStatsRepository: UsageStatsRepository
+) : ViewModel() {
     
     val usageStats: StateFlow<UsageStats> = usageStatsRepository.statsFlow
         .stateIn(

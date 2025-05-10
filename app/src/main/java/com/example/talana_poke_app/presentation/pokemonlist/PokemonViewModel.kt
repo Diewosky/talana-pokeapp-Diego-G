@@ -3,22 +3,27 @@ package com.example.talana_poke_app.presentation.pokemonlist
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.talana_poke_app.data.local.AppDatabase
 import com.example.talana_poke_app.data.model.PokemonListItem
 import com.example.talana_poke_app.data.repository.PokemonRepository
 import com.example.talana_poke_app.data.repository.UsageStatsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class PokemonViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val pokemonRepository: PokemonRepository
+@HiltViewModel
+class PokemonViewModel @Inject constructor(
+    private val pokemonRepository: PokemonRepository,
     private val usageStatsRepository: UsageStatsRepository
+) : ViewModel() {
+
     private val _currentListType = MutableStateFlow(PokemonListType.ALL) // Default or initial type
 
     private val _uiState = MutableStateFlow(PokemonListUiState(isLoading = true))
@@ -32,21 +37,6 @@ class PokemonViewModel(application: Application) : AndroidViewModel(application)
     fun setUserId(newUserId: String?) {
         _userId.value = newUserId
         observePokemonData() // Reiniciar el flujo cuando cambia el usuario
-    }
-
-    init {
-        val database = AppDatabase.getDatabase(application)
-        val favoritePokemonDao = database.favoritePokemonDao()
-        val pokemonCacheDao = database.pokemonCacheDao()
-        
-        pokemonRepository = PokemonRepository(
-            favoritePokemonDao = favoritePokemonDao,
-            pokemonCacheDao = pokemonCacheDao
-        )
-        
-        usageStatsRepository = UsageStatsRepository.getInstance(application)
-        
-        // No iniciar el flujo aquí, esperar a tener userId
     }
 
     fun loadPokemons(listType: PokemonListType) {

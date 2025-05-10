@@ -1,66 +1,116 @@
-# TalanaPokeApp
+# Talana Poké App
 
-TalanaPokeApp es una aplicación Android sencilla construida con Kotlin y Jetpack Compose que muestra una lista de Pokémon obtenida de la [PokeAPI](https://pokeapi.co/). La aplicación carga y muestra los nombres e imágenes de los Pokémon, y permite marcar Pokémon como favoritos.
+Una aplicación Android moderna para explorar y coleccionar Pokémon, desarrollada con Kotlin y Jetpack Compose.
 
-## Características Actuales
+![Pokémon]() <!-- Puedes agregar una captura de pantalla de la app aquí -->
 
-*   Muestra una lista de los primeros 20 Pokémon.
-*   Para cada Pokémon, se muestra su nombre y su sprite (imagen) oficial.
-*   Permite marcar/desmarcar Pokémon como favoritos.
-*   El estado de favorito se guarda localmente y persiste entre sesiones de la aplicación.
-*   Interfaz de usuario construida enteramente con Jetpack Compose.
-*   Carga de datos de red utilizando Retrofit.
-*   Carga de imágenes asíncrona utilizando Coil.
-*   Persistencia de datos local utilizando Room.
-*   Arquitectura básica siguiendo patrones MVVM (Model-View-ViewModel) con un Repositorio para el acceso a datos.
+## 🌟 Características
 
-## Tecnologías Utilizadas
+### Funcionalidades principales
+- **Catálogo completo de Pokémon**: Visualiza los primeros 151 Pokémon con detalles completos
+- **Autenticación con Firebase**: Inicio de sesión con Google
+- **Favoritos personalizados**: Marca y guarda tus Pokémon favoritos por usuario
+- **Estadísticas de uso**: Seguimiento detallado de tu actividad en la app
+- **Buscador inteligente**: Encuentra fácilmente cualquier Pokémon por nombre
 
-*   **Lenguaje:** Kotlin
-*   **UI Toolkit:** Jetpack Compose
-*   **Networking:** Retrofit (para consumir la PokeAPI)
-*   **Conversión JSON:** Gson (con Retrofit)
-*   **Carga de Imágenes:** Coil (Compose)
-*   **Persistencia Local:** Room
-*   **Componentes de Arquitectura de Android:** ViewModel (AndroidViewModel), StateFlow, Flow (Coroutines)
-*   **API:** [PokeAPI (v2)](https://pokeapi.co/api/v2/)
+### Características técnicas
+- **UI moderna con Jetpack Compose**: Interfaz fluida y reactiva
+- **Arquitectura MVVM**: Código organizado, testeable y mantenible
+- **Inyección de dependencias con Hilt**: Componentes desacoplados y fácilmente testeables
+- **Estado reactivo con Kotlin Flows**: Actualizaciones en tiempo real de la UI
+- **Persistencia con Room**: Caché local y almacenamiento de favoritos
+- **Navegación con Navigation Compose**: Transiciones fluidas entre pantallas
 
-## Cómo Empezar
+## 🏗️ Arquitectura
 
-1.  **Clona el repositorio (o abre el proyecto si ya lo tienes).**
-2.  **Abre el proyecto en Android Studio.**
-    *   Espera a que Android Studio sincronice el proyecto con los archivos Gradle. Esto descargará todas las dependencias necesarias.
-3.  **Ejecuta la aplicación.**
-    *   Selecciona un emulador de Android o conecta un dispositivo físico.
-    *   Presiona el botón "Run" (▶️) en Android Studio.
+La aplicación sigue la arquitectura MVVM (Model-View-ViewModel) e implementa los principios de Clean Architecture:
 
-## Estructura del Proyecto (Simplificada)
+```
+app/
+├── data/                  # Capa de datos
+│   ├── local/             # Persistencia local con Room
+│   ├── model/             # Modelos de datos
+│   ├── network/           # Cliente API con Retrofit
+│   └── repository/        # Implementaciones de repositorios
+├── di/                    # Módulos de inyección de dependencias con Hilt
+├── presentation/          # Capa de presentación
+│   ├── auth/              # Autenticación con Firebase
+│   ├── mainmenu/          # Pantalla de menú principal
+│   ├── navigation/        # Configuración de navegación
+│   ├── pokemonlist/       # Listado y detalle de Pokémon
+│   └── stats/             # Estadísticas de uso
+└── ui/                    # Temas, componentes UI compartidos
+```
 
-*   `app/src/main/java/com/example/talanapokeapp/`
-    *   `data/`
-        *   `local/`:
-            *   `entity/`: Entidades de Room (e.g., `FavoritePokemon.kt`).
-            *   `dao/`: Data Access Objects de Room (e.g., `FavoritePokemonDao.kt`).
-            *   `AppDatabase.kt`: Clase principal de la base de datos Room.
-        *   `model/`: Clases de datos (data classes) para representar las respuestas de la API y los ítems de la UI.
-        *   `network/`: Interfaz de servicio Retrofit (`PokeApiService`) e instancia de Retrofit (`RetrofitInstance`).
-        *   `repository/`: `PokemonRepository` para gestionar la obtención de datos (de red y locales).
-    *   `presentation/`
-        *   `pokemonlist/`: Contiene el `PokemonViewModel`, `PokemonListUiState`, `PokemonDisplayItem` y los Composables de la pantalla (`PokemonListScreen.kt`).
-    *   `ui/theme/`: Archivos de tema generados por Jetpack Compose.
-    *   `MainActivity.kt`: Actividad principal que aloja la UI de Jetpack Compose.
-*   `app/build.gradle.kts`: Archivo de configuración de Gradle para el módulo de la aplicación (donde se declaran las dependencias).
-*   `app/src/main/AndroidManifest.xml`: Manifiesto de la aplicación (donde se declara el permiso de Internet, etc.).
+## 🔧 Tecnologías utilizadas
 
-## Posibles Mejoras Futuras
+### UI y presentación
+- **Jetpack Compose**: Framework de UI declarativo
+- **Material Design 3**: Componentes modernos y tematización
+- **Navigation Compose**: Navegación entre pantallas
+- **Coil**: Carga eficiente de imágenes
 
-*   Implementar paginación para cargar más Pokémon.
-*   Añadir una pantalla de detalle para cada Pokémon.
-*   Mejorar el manejo de errores y estados de carga.
-*   Añadir tests unitarios y de UI.
-*   Implementar persistencia de datos local (e.g., con Room) para cachear los Pokémon.
-*   Filtrar o buscar Pokémon.
+### Datos y lógica
+- **Retrofit**: Cliente HTTP para la comunicación con la API
+- **Gson**: Serialización/deserialización JSON
+- **Room**: Persistencia de datos local
+- **Kotlin Coroutines & Flows**: Operaciones asíncronas reactivas
+- **Kotlinx Serialization**: Serialización eficiente
 
----
+### Inyección de dependencias
+- **Hilt**: Framework de inyección de dependencias de Android
 
-Este README proporciona una buena visión general del proyecto. 
+### Autenticación
+- **Firebase Auth**: Autenticación de usuarios
+- **Google Sign-In**: Inicio de sesión con Google
+
+## 🚀 Recientes mejoras
+
+### Optimización de rendimiento
+- Caché local con tiempo de expiración para reducir llamadas a la API
+- Procesamiento paralelo de datos con Coroutines
+- Carga eficiente de imágenes con precargas
+
+### Mejoras en la arquitectura
+- Implementación de inyección de dependencias con Hilt
+- Migración de datos compartidos a específicos por usuario
+- Optimización del ciclo de vida de los ViewModels
+
+### Estadísticas personalizadas
+- Sistema de seguimiento de uso por usuario
+- Contador de Pokémon vistos y favoritos
+- Seguimiento de tiempo de uso y sesiones
+
+### Visuales y experiencia de usuario
+- Tematización personalizada con colores de Pokémon
+- Transiciones y animaciones fluidas
+- Modo oscuro adaptativo
+
+## 📝 Notas para desarrolladores
+
+### Requisitos
+- Android Studio Arctic Fox o superior
+- JDK 11+
+- Gradle 7.0+
+
+### Configuración
+1. Clona el repositorio
+2. Abre el proyecto en Android Studio
+3. Sincroniza con Gradle
+4. Ejecuta la aplicación
+
+### Estructura de paquetes
+- **data**: Contiene toda la lógica de acceso a datos
+- **di**: Módulos de inyección de dependencias
+- **presentation**: Contiene los ViewModels y componentes de UI
+- **ui**: Recursos compartidos de UI y temas
+
+## 🔜 Próximas características
+- Implementación de Paging 3 para carga infinita
+- Soporte para notificaciones push
+- Modo sin conexión mejorado
+- Tests unitarios y de UI
+- Soporte para compartir Pokémon favoritos
+
+## 📄 Licencia
+Este proyecto está licenciado bajo [Licencia MIT](LICENSE) 

@@ -1,6 +1,8 @@
 package com.example.talana_poke_app.presentation.mainmenu
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -23,9 +26,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.talana_poke_app.presentation.auth.AuthViewModel
 import com.example.talana_poke_app.presentation.navigation.Screen
@@ -73,98 +80,140 @@ fun MainMenuScreen(
             )
 
             // Botón Todos los Pokémon
-            Button(
+            PixelatedButton(
                 onClick = {
                     navController.navigate(Screen.PokemonList.route + "/${PokemonListType.ALL.name}")
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = PokemonRed
-                )
-            ) {
-                Text(
-                    "Todos los Pokémon",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-            }
+                text = "TODOS LOS POKÉMON",
+                color = PokemonRed,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Botón Mis Favoritos
-            Button(
+            PixelatedButton(
                 onClick = {
                     navController.navigate(Screen.PokemonList.route + "/${PokemonListType.FAVORITES.name}")
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = PokemonRed
-                )
-            ) {
-                Text(
-                    "Mis Favoritos",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-            }
+                text = "MIS FAVORITOS",
+                color = PokemonRed,
+                modifier = Modifier.fillMaxWidth()
+            )
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             
             // Botón Estadísticas
-            Button(
+            PixelatedButton(
                 onClick = {
                     navController.navigate(Screen.Stats.route)
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = PokemonBlue
-                )
-            ) {
-                Text(
-                    "Estadísticas de Uso",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-            }
+                text = "ESTADÍSTICAS",
+                color = PokemonBlue,
+                modifier = Modifier.fillMaxWidth()
+            )
 
             Spacer(modifier = Modifier.height(60.dp))
 
             // Botón de cerrar sesión 
-            Button(
+            PixelatedButton(
                 onClick = {
                     authViewModel.signOut()
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = PokemonBlue
-                )
-            ) {
-                Text(
-                    "Cerrar Sesión",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
+                text = "CERRAR SESIÓN",
+                color = Color.Gray,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+fun PixelatedButton(
+    onClick: () -> Unit,
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    // Colores
+    val mainColor = color
+    val borderColor = Color.Black
+    val shadowColor = Color(0xFF555555)
+    val textColor = Color.White
+    
+    // Estructura de capas para simular efecto pixelado
+    Box(
+        modifier = modifier
+            .height(64.dp)
+    ) {
+        // Capa de sombra pixelada (4dp offset)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .offset(x = 4.dp, y = 4.dp)
+                .clip(RoundedCornerShape(0.dp))  // Esquinas cuadradas, estilo pixelado
+                .background(shadowColor)
+        )
+        
+        // Capa base del botón con efecto pixelado
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .offset(x = 0.dp, y = 0.dp)
+                .clip(RoundedCornerShape(0.dp))  // Esquinas cuadradas, estilo pixelado
+                .background(mainColor)
+                .border(width = 4.dp, color = borderColor)
+                .drawBehind {
+                    // Líneas horizontales para efecto pixelado
+                    for (y in 0..size.height.toInt() step 4) {
+                        drawLine(
+                            color = mainColor.copy(alpha = 0.7f),
+                            start = Offset(0f, y.toFloat()),
+                            end = Offset(size.width, y.toFloat()),
+                            strokeWidth = 2f
+                        )
+                    }
+                    
+                    // Borde interior para efecto 3D pixelado
+                    drawLine(
+                        color = Color.White.copy(alpha = 0.3f),
+                        start = Offset(4f, 4f),
+                        end = Offset(size.width - 4f, 4f),
+                        strokeWidth = 2f
                     )
-                )
-            }
+                    drawLine(
+                        color = Color.White.copy(alpha = 0.3f),
+                        start = Offset(4f, 4f),
+                        end = Offset(4f, size.height - 4f),
+                        strokeWidth = 2f
+                    )
+                    
+                    // Borde oscuro para efecto 3D pixelado
+                    drawLine(
+                        color = Color.Black.copy(alpha = 0.3f),
+                        start = Offset(4f, size.height - 4f),
+                        end = Offset(size.width - 4f, size.height - 4f),
+                        strokeWidth = 2f
+                    )
+                    drawLine(
+                        color = Color.Black.copy(alpha = 0.3f),
+                        start = Offset(size.width - 4f, 4f),
+                        end = Offset(size.width - 4f, size.height - 4f),
+                        strokeWidth = 2f
+                    )
+                }
+                .clickable { onClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            // Texto con estilo pixelado
+            Text(
+                text = text,
+                color = textColor,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                letterSpacing = 1.sp,
+                modifier = Modifier.padding(8.dp)
+            )
         }
     }
 } 
