@@ -168,6 +168,13 @@ app/
 - Contador de Pokémon vistos y favoritos
 - Seguimiento de tiempo de uso
 
+## 🎨 Diseño
+
+Se proporcionó el siguiente enlace como apoyo de diseño, al cual no se obtuvo acceso:
+[Diseño en Figma](https://www.figma.com/design/3uRcJE3a01ZiVcZ0q9FvNj/POGO-%7C-TELOS-Academy-%5BMobile-App-01%5D---Th%E1%BB%8Bnh-%C4%90inh-(Community)?node-id=608-2865&node-type=FRAME&t=ew7LvNKmqPDjR0V3-0)
+
+**Nota:** Aunque se facilitó este enlace, no se otorgó acceso al archivo de Figma durante el desarrollo. Por lo tanto, el diseño de la aplicación se basó en la interpretación de los requisitos y la temática Pokémon, buscando una estética retro y funcional.
+
 ## 📝 Notas para desarrolladores
 
 ### Requisitos
