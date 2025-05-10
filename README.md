@@ -4,6 +4,19 @@ Una aplicación Android para explorar Pokémon, desarrollada con Kotlin y Jetpac
 
 **Autor:** Diego Andrés Gutiérrez Mella
 
+## 📱 Capturas de pantalla
+
+<div align="center">
+  <img src="app/src/main/res/capturas/login.png" alt="Login" width="250"/>
+  <img src="app/src/main/res/capturas/menu.png" alt="Menú Principal" width="250"/>
+  <img src="app/src/main/res/capturas/pokemones.png" alt="Lista de Pokémon" width="250"/>
+  <img src="app/src/main/res/capturas/infopoke1.png" alt="Detalle Pokémon 1" width="250"/>
+  <img src="app/src/main/res/capturas/infopoke2.png" alt="Detalle Pokémon 2" width="250"/>
+  <img src="app/src/main/res/capturas/fav.png" alt="Favoritos" width="250"/>
+  <img src="app/src/main/res/capturas/estadisticas.png" alt="Estadísticas" width="250"/>
+  <img src="app/src/main/res/capturas/iconoapp.png" alt="Icono App" width="100"/> 
+</div>
+
 ## 📥 Descarga directa
 
 Puedes descargar el APK directamente desde este enlace:
@@ -222,3 +235,27 @@ Para abordar este desafío, seguí un proceso iterativo centrado en la funcional
 - **Sincronización offline/online**: Sistema de caché con Room
 - **Sistema de filtrado**: Implementación de filtros combinados (texto + tipo)
 - **Navegación fluida**: Implementación de caché en memoria para evitar recargas innecesarias
+
+## 💡 Añadir capturas de pantalla
+
+Para añadir tus propias capturas de pantalla al README:
+
+1. Crea una carpeta llamada `capturas` dentro de `app/src/main/res/`
+   ```bash
+   mkdir -p app/src/main/res/capturas
+   ```
+
+2. Añade tus capturas de pantalla a esta carpeta (preferiblemente en formato PNG)
+
+3. Edita la sección de capturas de pantalla en este README para referenciar tus imágenes:
+   ```markdown
+   <div align="center">
+     <img src="app/src/main/res/capturas/tu_captura1.png" alt="Descripción" width="250"/>
+     <img src="app/src/main/res/capturas/tu_captura2.png" alt="Descripción" width="250"/>
+     // ... más imágenes ...
+   </div>
+   ```
+
+4. Ajusta el ancho (`width="250"`) según necesites para que se muestren correctamente
+
+5. Asegúrate de subir las imágenes junto con tu código al repositorio
