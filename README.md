@@ -1,8 +1,11 @@
 # Talana Poké App
 
-Una aplicación Android moderna para explorar y coleccionar Pokémon, desarrollada con Kotlin y Jetpack Compose. Este proyecto fue creado como parte del proceso de postulación para el puesto de Software Developer Android en Talana.
+Una aplicación Android para explorar Pokémon, desarrollada con Kotlin y Jetpack Compose. Este proyecto fue creado como parte del proceso de postulación en Talana.
 
-![Pokémon](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png)
+## 📥 Descarga directa
+
+Puedes descargar el APK directamente desde este enlace:
+[Descargar APK (Google Drive)](https://drive.google.com/drive/folders/1__IpoStHxiNQ1aw5a1A4zZMq02c3PP9v?usp=sharing)
 
 ## 📋 Acerca del desafío
 
@@ -20,47 +23,46 @@ Uno de los principales desafíos propuestos fue crear un feed dinámico eficient
 
 **Solución implementada:**
 - Arquitectura optimizada con Jetpack Compose que evita los problemas de RecyclerViews anidados
-- Lazy loading con paginación eficiente para carga progresiva de elementos
+- Lazy loading para carga progresiva de elementos
 - Caché local con Room para reducir llamadas a la API y mejorar rendimiento offline
 - Procesamiento de imágenes optimizado con Coil
 - Uso de coroutines para operaciones asíncronas sin bloquear el hilo principal
 
 ### ⭐ Extras implementados
 
-- **Inyección de dependencias:** Implementación completa con Hilt
+- **Inyección de dependencias:** Implementación con Hilt
 - **Autenticación:** Integración con Firebase Authentication y Google Sign-In
 - **Características avanzadas:**
   - Buscador de Pokémon con resultados en tiempo real
   - Filtros por tipo de Pokémon con interfaz visual
-  - Sistema avanzado de estadísticas de usuario
-  - Modo oscuro adaptativo
-  - Caché inteligente con tiempo de expiración
+  - Sistema de estadísticas de usuario
+  - Caché con tiempo de expiración
 
 ## 🌟 Características
 
 ### Funcionalidades principales
-- **Catálogo completo de Pokémon**: Visualiza los primeros 151 Pokémon con detalles completos
+- **Catálogo de Pokémon**: Visualiza los primeros 151 Pokémon con detalles
 - **Autenticación con Firebase**: Inicio de sesión con Google
 - **Favoritos personalizados**: Marca y guarda tus Pokémon favoritos por usuario
-- **Estadísticas de uso**: Seguimiento detallado de tu actividad en la app
+- **Estadísticas de uso**: Seguimiento de tu actividad en la app
 - **Buscador inteligente**: Encuentra fácilmente cualquier Pokémon por nombre
 - **Filtros por tipo**: Filtra Pokémon por cualquiera de los 18 tipos disponibles
 
 ### Detalles de implementación de funcionalidades
-- **Catálogo Pokémon**: Implementado con paginación para carga eficiente de datos desde PokeAPI
-- **Sistema de autenticación**: Flujo completo de inicio/cierre de sesión con persistencia de estado
-- **Gestión de favoritos**: Sincronización en tiempo real entre Firestore y caché local
-- **Panel de estadísticas**: Gráficos interactivos con visualización de datos personalizados
-- **Motor de búsqueda**: Filtrado instantáneo con resultados predictivos
+- **Catálogo Pokémon**: Implementado con carga eficiente de datos desde PokeAPI
+- **Sistema de autenticación**: Flujo de inicio/cierre de sesión con persistencia de estado
+- **Gestión de favoritos**: Almacenamiento local de Pokémon favoritos
+- **Panel de estadísticas**: Visualización de datos de uso personalizados
+- **Motor de búsqueda**: Filtrado en tiempo real con resultados predictivos
 - **Sistema de filtros**: Chips interactivos para filtrar por tipo con feedback visual inmediato
 
 ### Características técnicas
 - **UI moderna con Jetpack Compose**: Interfaz fluida y reactiva
 - **Arquitectura MVVM**: Código organizado, testeable y mantenible
-- **Inyección de dependencias con Hilt**: Componentes desacoplados y fácilmente testeables
+- **Inyección de dependencias con Hilt**: Componentes desacoplados
 - **Estado reactivo con Kotlin Flows**: Actualizaciones en tiempo real de la UI
 - **Persistencia con Room**: Caché local y almacenamiento de favoritos
-- **Navegación con Navigation Compose**: Transiciones fluidas entre pantallas
+- **Navegación con Navigation Compose**: Transiciones entre pantallas
 
 ## 🏗️ Arquitectura
 
@@ -86,30 +88,15 @@ app/
 ### Flujo de datos y responsabilidades
 
 #### Capa de Datos
-- **Model**: Define entidades de dominio y DTOs para mapeo entre API y base de datos
+- **Model**: Define entidades y DTOs para mapeo entre API y base de datos
 - **Network**: Gestiona comunicación con APIs externas (PokeAPI, Firebase)
 - **Local**: Implementa Room para persistencia y cache de datos
-- **Repository**: Orquesta fuentes de datos y expone interfaces limpias a la capa de presentación
+- **Repository**: Orquesta fuentes de datos y expone interfaces a la capa de presentación
 
 #### Capa de Presentación
 - **ViewModel**: Maneja la lógica de negocio y transforma datos para la UI
 - **Screens**: Componentes UI en Compose que observan estados del ViewModel
-- **State Holders**: Clases inmutables que representan el estado de la UI
-
-#### Diagrama de Flujo de Datos
-```
-[UI Layer] ←→ [ViewModel] ←→ [Repository] ←→ [API/Database]
-    ↑             ↑               ↑
-    │             │               │
- [Compose]    [StateFlow]    [Coroutines]
-```
-
-### Patrones de diseño implementados
-- **Repository Pattern**: Abstracción de fuentes de datos
-- **Observer Pattern**: Con StateFlow/SharedFlow para actualizaciones de UI
-- **Dependency Injection**: Con Hilt para gestión de dependencias
-- **Use Case Pattern**: Para encapsular lógica de negocio específica
-- **Adapter Pattern**: Para transformación de datos entre capas
+- **State Holders**: Clases que representan el estado de la UI
 
 ## 🔧 Tecnologías utilizadas
 
@@ -117,7 +104,7 @@ app/
 - **Jetpack Compose**: Framework de UI declarativo
 - **Material Design 3**: Componentes modernos y tematización
 - **Navigation Compose**: Navegación entre pantallas
-- **Coil**: Carga eficiente de imágenes
+- **Coil**: Carga de imágenes
 
 ### Datos y lógica
 - **Retrofit**: Cliente HTTP para la comunicación con la API
@@ -143,24 +130,19 @@ app/
 - **Diseño pixelado**: Manteniendo la coherencia estética con el resto de la aplicación
 
 ### Optimización de rendimiento
-- Caché local con tiempo de expiración para reducir llamadas a la API
-- Procesamiento paralelo de datos con Coroutines
-- Carga eficiente de imágenes con precargas
+- Caché local para reducir llamadas a la API
+- Procesamiento de datos con Coroutines
+- Carga eficiente de imágenes
 
 ### Mejoras en la arquitectura
 - Implementación de inyección de dependencias con Hilt
-- Migración de datos compartidos a específicos por usuario
+- Datos específicos por usuario
 - Optimización del ciclo de vida de los ViewModels
 
 ### Estadísticas personalizadas
 - Sistema de seguimiento de uso por usuario
 - Contador de Pokémon vistos y favoritos
-- Seguimiento de tiempo de uso y sesiones
-
-### Visuales y experiencia de usuario
-- Tematización personalizada con colores de Pokémon
-- Transiciones y animaciones fluidas
-- Modo oscuro adaptativo
+- Seguimiento de tiempo de uso
 
 ## 📝 Notas para desarrolladores
 
@@ -196,16 +178,12 @@ cd TalanaPokeApp
 
 El código fuente principal de la aplicación se encuentra bajo el paquete `com.example.talana_poke_app`.
 
-## 🔜 Próximas características
+## 🔜 Posibles mejoras futuras
 - Implementación de GraphQL para consultas optimizadas a la API
-- Implementación de Paging 3 para carga infinita
 - Soporte para notificaciones push
 - Modo sin conexión mejorado
 - Tests unitarios y de UI
 - Soporte para compartir Pokémon favoritos
-
-## 📄 Licencia
-Este proyecto está licenciado bajo [Licencia MIT](LICENSE)
 
 ## 👨‍💻 Proceso de desarrollo
 
@@ -214,30 +192,18 @@ Para abordar este desafío, seguí un proceso iterativo centrado en la funcional
 
 1. **Planificación inicial**: Análisis de requerimientos y diseño de la arquitectura básica
 2. **Prototipado rápido**: Implementación de un feed básico con Compose para validar el enfoque
-3. **Desarrollo incremental**: Adición progresiva de funcionalidades, comenzando por:
-   - Configuración de la arquitectura MVVM + Clean
-   - Implementación del cliente de API
-   - Desarrollo de la UI principal con Compose
-   - Integración del sistema de autenticación
-   - Implementación del almacenamiento local
+3. **Desarrollo incremental**: Adición progresiva de funcionalidades
 4. **Optimización**: Mejora del rendimiento y experiencia de usuario
 5. **Pruebas**: Validación manual en dispositivos de diferentes características
 
 ### Desafíos técnicos superados
-- **Rendimiento del feed**: Resuelto mediante arquitectura optimizada y técnicas avanzadas de Compose
+- **Rendimiento del feed**: Resuelto mediante arquitectura optimizada y técnicas de Compose
 - **Gestión de estado**: Implementación de flujos de datos unidireccionales con StateFlow
-- **Sincronización offline/online**: Sistema de caché inteligente con Room y políticas de actualización
-- **Sistema de filtrado complejo**: Implementación de filtros combinados (texto + tipo) manteniendo el rendimiento
+- **Sincronización offline/online**: Sistema de caché con Room
+- **Sistema de filtrado**: Implementación de filtros combinados (texto + tipo)
 
 ### Lecciones aprendidas
 - La importancia de arquitecturas limpias para mantener el código escalable
-- Ventajas de Jetpack Compose para resolver problemas clásicos de rendimiento en UI complejas
-- Valor de las buenas prácticas como inyección de dependencias para testing y mantenibilidad
-- Importancia del diseño de UX para funcionalidades de filtrado intuitivas
-
-## 📊 Métricas y resultados
-
-- **Rendimiento**: Feed con scroll fluido incluso en dispositivos de gama baja (probado en emuladores con especificaciones reducidas)
-- **Tiempo de carga**: Optimizado a <1.5 segundos para la carga inicial
-- **Tamaño de APK**: Reducido a ~8MB mediante optimización de recursos
-- **Consumo de RAM**: Minimizado a través de gestión eficiente de recursos y caché 
+- Ventajas de Jetpack Compose para resolver problemas de rendimiento en UI
+- Valor de las buenas prácticas como inyección de dependencias
+- Importancia del diseño de UX para funcionalidades de filtrado intuitivas 
