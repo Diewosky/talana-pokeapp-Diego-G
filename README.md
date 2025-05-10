@@ -2,6 +2,8 @@
 
 Una aplicación Android para explorar Pokémon, desarrollada con Kotlin y Jetpack Compose. Este proyecto fue creado como parte del proceso de postulación en Talana.
 
+**Autor:** Diego Andrés Gutiérrez Mella
+
 ## 📥 Descarga directa
 
 Puedes descargar el APK directamente desde este enlace:
@@ -179,6 +181,15 @@ cd TalanaPokeApp
    - Descarga el archivo `google-services.json` y colócalo en el directorio `app/`
 4. Ejecuta la aplicación en un emulador o dispositivo físico
 
+### Compilación
+Para generar el APK del proyecto:
+
+1. **Desde Android Studio:**
+   - Selecciona "Build" en el menú principal
+   - Haz clic en "Build Bundle(s) / APK(s)"
+   - Selecciona "Build APK(s)"
+   - El APK se generará en `app/build/outputs/apk/debug/`
+ 
 ### Estructura de paquetes
 - **data**: Contiene toda la lógica de acceso a datos
 - **di**: Módulos de inyección de dependencias
