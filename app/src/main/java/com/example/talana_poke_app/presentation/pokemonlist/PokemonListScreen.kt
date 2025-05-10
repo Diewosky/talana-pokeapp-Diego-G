@@ -547,12 +547,10 @@ fun PokemonDetailDialog(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Encabezado con imagen y nombre
+                    // Encabezado con imagen y nombre (FIJO)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -625,102 +623,119 @@ fun PokemonDetailDialog(
                             }
                     )
 
-                    // Información básica
-                    PixelatedCard(
-                        title = "Información básica",
-                        color = Color(0xFFFFF3E0).copy(alpha = 0.8f),
-                        content = {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                modifier = Modifier.padding(top = 4.dp)
-                            ) {
-                                pokemon.height?.let { 
-                                    InfoItem(
-                                        title = "Altura",
-                                        value = "${it / 10.0} m",
-                                        modifier = Modifier.weight(1f)
+                    // CONTENIDO DESPLAZABLE (solo esta parte es scrollable)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            // Información básica
+                            PixelatedCard(
+                                title = "Información básica",
+                                color = Color(0xFFFFF3E0).copy(alpha = 0.8f),
+                                content = {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    ) {
+                                        pokemon.height?.let { 
+                                            InfoItem(
+                                                title = "Altura",
+                                                value = "${it / 10.0} m",
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                        }
+                                        pokemon.weight?.let { 
+                                            InfoItem(
+                                                title = "Peso",
+                                                value = "${it / 10.0} kg",
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                        }
+                                    }
+                                    
+                                    // Estado de favorito
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(top = 8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = if (pokemon.isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                                            contentDescription = "Favorite status",
+                                            tint = if (pokemon.isFavorite) Color(0xFFFFD700) else Color.Gray,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = if (pokemon.isFavorite) "Favorito" else "No es favorito",
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                    }
+                                }
+                            )
+
+                            // Habilidades
+                            pokemon.abilities?.let { abilities ->
+                                if (abilities.isNotEmpty()) {
+                                    PixelatedCard(
+                                        title = "Habilidades",
+                                        color = Color(0xFFE0F7FA).copy(alpha = 0.8f),
+                                        content = {
+                                            Column(
+                                                modifier = Modifier.padding(start = 8.dp, top = 4.dp),
+                                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                abilities.forEach { abilityName ->
+                                                    Text(
+                                                        text = "• $abilityName",
+                                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                                            letterSpacing = 0.5.sp
+                                                        )
+                                                    )
+                                                }
+                                            }
+                                        }
                                     )
                                 }
-                                pokemon.weight?.let { 
-                                    InfoItem(
-                                        title = "Peso",
-                                        value = "${it / 10.0} kg",
-                                        modifier = Modifier.weight(1f)
+                            }
+
+                            // Estadísticas
+                            pokemon.stats?.let { stats ->
+                                if (stats.isNotEmpty()) {
+                                    PixelatedCard(
+                                        title = "Estadísticas Base",
+                                        color = Color(0xFFF5F5F5).copy(alpha = 0.8f),
+                                        content = {
+                                            Column(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                stats.forEach { (statName, statValue) ->
+                                                    PixelatedStatBar(
+                                                        statName = statName,
+                                                        statValue = statValue
+                                                    )
+                                                }
+                                            }
+                                        }
                                     )
                                 }
                             }
                             
-                            // Estado de favorito
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(top = 8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = if (pokemon.isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                                    contentDescription = "Favorite status",
-                                    tint = if (pokemon.isFavorite) Color(0xFFFFD700) else Color.Gray,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = if (pokemon.isFavorite) "Favorito" else "No es favorito",
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                            }
-                        }
-                    )
-
-                    // Habilidades
-                    pokemon.abilities?.let { abilities ->
-                        if (abilities.isNotEmpty()) {
-                            PixelatedCard(
-                                title = "Habilidades",
-                                color = Color(0xFFE0F7FA).copy(alpha = 0.8f),
-                                content = {
-                                    Column(
-                                        modifier = Modifier.padding(start = 8.dp, top = 4.dp),
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        abilities.forEach { abilityName ->
-                                            Text(
-                                                text = "• $abilityName",
-                                                style = MaterialTheme.typography.bodyMedium.copy(
-                                                    letterSpacing = 0.5.sp
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                            )
+                            // Espacio adicional al final para asegurar que todo sea visible al hacer scroll
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
 
-                    // Estadísticas
-                    pokemon.stats?.let { stats ->
-                        if (stats.isNotEmpty()) {
-                            PixelatedCard(
-                                title = "Estadísticas Base",
-                                color = Color(0xFFF5F5F5).copy(alpha = 0.8f),
-                                content = {
-                                    Column(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        stats.forEach { (statName, statValue) ->
-                                            PixelatedStatBar(
-                                                statName = statName,
-                                                statValue = statValue
-                                            )
-                                        }
-                                    }
-                                }
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f, fill = false))
-
-                    // Botón cerrar
+                    // Botón cerrar (FIJO)
+                    Spacer(modifier = Modifier.height(16.dp))
                     PixelatedButton(
                         onClick = onDismissRequest,
                         text = "CERRAR",
