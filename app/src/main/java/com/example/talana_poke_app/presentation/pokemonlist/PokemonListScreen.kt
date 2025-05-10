@@ -6,15 +6,26 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -22,7 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun PokemonListScreen(
     navController: NavController,
@@ -30,9 +41,17 @@ fun PokemonListScreen(
     listType: PokemonListType,
 ) {
     val uiState by pokemonViewModel.uiState.collectAsState()
+    val searchQuery by pokemonViewModel.searchQuery.collectAsState()
 
     var showDetailDialog by remember { mutableStateOf(false) }
     var selectedPokemonForDialog by remember { mutableStateOf<PokemonDisplayItem?>(null) }
+    
+    // Estado para mostrar/ocultar la barra de búsqueda
+    var showSearchBar by remember { mutableStateOf(false) }
+    
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(listType) {
         pokemonViewModel.loadPokemons(listType)
@@ -40,16 +59,41 @@ fun PokemonListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(if (listType == PokemonListType.ALL) "Todos los Pokémon" else "Mis Favoritos")
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+            if (showSearchBar && listType == PokemonListType.ALL) {
+                // Barra de búsqueda
+                SearchBar(
+                    query = searchQuery,
+                    onQueryChange = { pokemonViewModel.updateSearchQuery(it) },
+                    onSearch = {
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                    },
+                    onClose = { 
+                        showSearchBar = false
+                        pokemonViewModel.updateSearchQuery("")
+                    },
+                    focusRequester = focusRequester
+                )
+            } else {
+                // Barra superior normal
+                TopAppBar(
+                    title = {
+                        Text(if (listType == PokemonListType.ALL) "Todos los Pokémon" else "Mis Favoritos")
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.navigateUp() }) {
+                            Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                        }
+                    },
+                    actions = {
+                        if (listType == PokemonListType.ALL) {
+                            IconButton(onClick = { showSearchBar = true }) {
+                                Icon(Icons.Filled.Search, contentDescription = "Buscar")
+                            }
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     ) { paddingValues ->
         Box(
@@ -83,12 +127,70 @@ fun PokemonListScreen(
         }
     }
 
+    // Efecto para mostrar el teclado cuando se abre la barra de búsqueda
+    LaunchedEffect(showSearchBar) {
+        if (showSearchBar) {
+            try {
+                focusRequester.requestFocus()
+            } catch (e: Exception) {
+                // Manejar excepción si ocurre
+            }
+        }
+    }
+
     if (showDetailDialog && selectedPokemonForDialog != null) {
         PokemonDetailDialog(
             pokemon = selectedPokemonForDialog!!,
             onDismissRequest = { showDetailDialog = false }
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@Composable
+fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onSearch: () -> Unit,
+    onClose: () -> Unit,
+    focusRequester: FocusRequester
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    
+    TopAppBar(
+        title = {
+            TextField(
+                value = query,
+                onValueChange = onQueryChange,
+                placeholder = { Text("Buscar Pokémon...") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = { onSearch() }),
+                trailingIcon = {
+                    if (query.isNotEmpty()) {
+                        IconButton(onClick = { onQueryChange("") }) {
+                            Icon(Icons.Filled.Clear, contentDescription = "Limpiar búsqueda")
+                        }
+                    }
+                }
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onClose) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = "Cerrar búsqueda")
+            }
+        }
+    )
 }
 
 @Composable

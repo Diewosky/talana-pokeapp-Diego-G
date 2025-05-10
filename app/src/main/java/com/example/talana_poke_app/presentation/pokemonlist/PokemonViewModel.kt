@@ -21,6 +21,9 @@ class PokemonViewModel(application: Application) : AndroidViewModel(application)
 
     private val _uiState = MutableStateFlow(PokemonListUiState(isLoading = true))
     val uiState: StateFlow<PokemonListUiState> = _uiState.asStateFlow()
+    
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     init {
         val database = AppDatabase.getDatabase(application)
@@ -37,10 +40,14 @@ class PokemonViewModel(application: Application) : AndroidViewModel(application)
     fun loadPokemons(listType: PokemonListType) {
         _currentListType.value = listType
     }
+    
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
 
     private fun observePokemonData() {
         viewModelScope.launch {
-            _currentListType.flatMapLatest { type ->
+            val pokemonDataFlow = _currentListType.flatMapLatest { type ->
                 _uiState.update { it.copy(isLoading = true, error = null, pokemonList = emptyList()) } // Reset on type change
                 when (type) {
                     PokemonListType.ALL -> fetchAllPokemonFromApi()
@@ -57,12 +64,25 @@ class PokemonViewModel(application: Application) : AndroidViewModel(application)
                 }
                 updatedList
             }
-            .collect { combinedList ->
+            
+            // Combinar con la búsqueda
+            pokemonDataFlow.combine(_searchQuery) { pokemonList, searchTerm ->
+                if (searchTerm.isBlank()) {
+                    pokemonList
+                } else {
+                    pokemonList.filter { 
+                        it.name.contains(searchTerm, ignoreCase = true) 
+                    }
+                }
+            }
+            .collect { filteredList ->
                 _uiState.update {
                     it.copy(
                         isLoading = false, // Loading is handled before this combine
-                        pokemonList = combinedList,
-                        error = if (combinedList.isEmpty() && !it.isLoading) "No Pokémon found." else it.error
+                        pokemonList = filteredList,
+                        error = if (filteredList.isEmpty() && !it.isLoading) {
+                            if (_searchQuery.value.isNotBlank()) "No se encontraron resultados para: ${_searchQuery.value}" else "No Pokémon found."
+                        } else it.error
                     )
                 }
             }
