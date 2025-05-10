@@ -24,7 +24,7 @@ Uno de los principales desafíos propuestos fue crear un feed dinámico eficient
 **Solución implementada:**
 - Arquitectura optimizada con Jetpack Compose que evita los problemas de RecyclerViews anidados
 - Lazy loading para carga progresiva de elementos
-- Caché local con Room para reducir llamadas a la API y mejorar rendimiento offline
+- Sistema de caché multinivel (memoria y base de datos) para reducir llamadas a la API
 - Procesamiento de imágenes optimizado con Coil
 - Uso de coroutines para operaciones asíncronas sin bloquear el hilo principal
 
@@ -36,7 +36,7 @@ Uno de los principales desafíos propuestos fue crear un feed dinámico eficient
   - Buscador de Pokémon con resultados en tiempo real
   - Filtros por tipo de Pokémon con interfaz visual
   - Sistema de estadísticas de usuario
-  - Caché con tiempo de expiración
+  - Caché con estrategia multinivel y tiempo de expiración
 
 ## 🌟 Características
 
@@ -47,6 +47,7 @@ Uno de los principales desafíos propuestos fue crear un feed dinámico eficient
 - **Estadísticas de uso**: Seguimiento de tu actividad en la app
 - **Buscador inteligente**: Encuentra fácilmente cualquier Pokémon por nombre
 - **Filtros por tipo**: Filtra Pokémon por cualquiera de los 18 tipos disponibles
+- **Navegación fluida**: Experiencia sin interrupciones al navegar entre pantallas
 
 ### Detalles de implementación de funcionalidades
 - **Catálogo Pokémon**: Implementado con carga eficiente de datos desde PokeAPI
@@ -55,6 +56,7 @@ Uno de los principales desafíos propuestos fue crear un feed dinámico eficient
 - **Panel de estadísticas**: Visualización de datos de uso personalizados
 - **Motor de búsqueda**: Filtrado en tiempo real con resultados predictivos
 - **Sistema de filtros**: Chips interactivos para filtrar por tipo con feedback visual inmediato
+- **Caché multinivel**: Estrategia de caché en memoria y persistente para optimizar rendimiento
 
 ### Características técnicas
 - **UI moderna con Jetpack Compose**: Interfaz fluida y reactiva
@@ -121,6 +123,13 @@ app/
 - **Google Sign-In**: Inicio de sesión con Google
 
 ## 🚀 Recientes mejoras
+
+### Sistema de caché multinivel
+- **Caché en memoria**: Implementación de caché en memoria para navegación instantánea
+- **Jerarquía de fuentes de datos**: Consulta priorizada (memoria → base de datos → API)
+- **Control de expiración**: Tiempos de expiración diferenciados para cada nivel de caché
+- **Recuperación ante fallos**: Uso de caché expirada si falla la red
+- **Experiencia de usuario mejorada**: Navegación fluida entre pantallas sin tiempos de carga
 
 ### Sistema avanzado de filtros
 - **Filtrado por tipo de Pokémon**: Implementado mediante chips interactivos
@@ -201,9 +210,11 @@ Para abordar este desafío, seguí un proceso iterativo centrado en la funcional
 - **Gestión de estado**: Implementación de flujos de datos unidireccionales con StateFlow
 - **Sincronización offline/online**: Sistema de caché con Room
 - **Sistema de filtrado**: Implementación de filtros combinados (texto + tipo)
+- **Navegación fluida**: Implementación de caché en memoria para evitar recargas innecesarias
 
 ### Lecciones aprendidas
 - La importancia de arquitecturas limpias para mantener el código escalable
 - Ventajas de Jetpack Compose para resolver problemas de rendimiento en UI
 - Valor de las buenas prácticas como inyección de dependencias
-- Importancia del diseño de UX para funcionalidades de filtrado intuitivas 
+- Importancia del diseño de UX para funcionalidades de filtrado intuitivas
+- Estrategias de caché efectivas para mejorar la experiencia de usuario 

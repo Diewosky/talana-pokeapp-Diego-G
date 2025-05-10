@@ -14,7 +14,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import javax.inject.Singleton
 
+@Singleton
 class PokemonRepository(
     private val apiService: PokeApiService = RetrofitInstance.api,
     private val favoritePokemonDao: FavoritePokemonDao,
@@ -22,14 +24,36 @@ class PokemonRepository(
 ) {
     // Tiempo de expiración de caché: 24 horas
     private val cacheExpirationTime = TimeUnit.HOURS.toMillis(24)
+    
+    // Caché en memoria para la lista de Pokémon
+    private var cachedPokemonList: List<PokemonListItem>? = null
+    private var lastPokemonListFetchTime: Long = 0
+    
+    // Caché en memoria para detalles de Pokémon
+    private val pokemonDetailsCache = mutableMapOf<String, PokemonDetailResponse>()
+    
+    // Duración de la caché en memoria (30 minutos)
+    private val inMemoryCacheExpiration = TimeUnit.MINUTES.toMillis(30)
 
     suspend fun getPokemonList(limit: Int = 20): List<PokemonListItem> {
+        // Verificar si hay datos en caché y si no han expirado
+        val currentTime = System.currentTimeMillis()
+        if (cachedPokemonList != null && 
+            (currentTime - lastPokemonListFetchTime) < inMemoryCacheExpiration) {
+            Log.d("PokemonRepository", "Using in-memory cache for Pokemon list")
+            return cachedPokemonList!!
+        }
+        
         return try {
             val response = apiService.getPokemonList(limit = limit)
+            // Actualizar la caché en memoria
+            cachedPokemonList = response.results
+            lastPokemonListFetchTime = currentTime
             response.results
         } catch (e: Exception) {
             Log.e("PokemonRepository", "Error fetching Pokemon list", e)
-            emptyList()
+            // Si hay un error, intentar usar la caché aunque haya expirado
+            cachedPokemonList ?: emptyList()
         }
     }
 
@@ -37,15 +61,23 @@ class PokemonRepository(
         // Extraer el nombre del Pokémon de la URL
         val pokemonName = url.split("/").filter { it.isNotEmpty() }.lastOrNull()
         
+        // Verificar primero en la caché en memoria
+        if (pokemonName != null && pokemonDetailsCache.containsKey(pokemonName)) {
+            Log.d("PokemonRepository", "In-memory cache hit for $pokemonName")
+            return pokemonDetailsCache[pokemonName]
+        }
+        
         if (pokemonName != null) {
-            // Verificar si tenemos el Pokémon en caché
+            // Verificar si tenemos el Pokémon en caché de base de datos
             pokemonCacheDao?.let { cacheDao ->
                 val cachedPokemon = cacheDao.getPokemonByName(pokemonName)
                 
                 // Si existe en caché y no ha expirado, convertirlo a PokemonDetailResponse y retornarlo
                 if (cachedPokemon != null && !isCacheExpired(cachedPokemon.timestamp)) {
-                    Log.d("PokemonRepository", "Cache hit for $pokemonName")
-                    return mapCacheToPokemonDetail(cachedPokemon)
+                    Log.d("PokemonRepository", "Database cache hit for $pokemonName")
+                    val response = mapCacheToPokemonDetail(cachedPokemon)
+                    pokemonDetailsCache[pokemonName] = response // Guardar en memoria también
+                    return response
                 }
             }
         }
@@ -56,6 +88,9 @@ class PokemonRepository(
             
             // Guardar en caché si el DAO está disponible
             if (pokemonName != null) {
+                // Guardar en la caché en memoria
+                pokemonDetailsCache[pokemonName] = detailResponse
+                // Guardar en la base de datos
                 saveToCache(detailResponse, url)
             }
             
@@ -64,6 +99,14 @@ class PokemonRepository(
             Log.e("PokemonRepository", "Error fetching Pokemon detail", e)
             null
         }
+    }
+
+    // Función para limpiar la caché en memoria si es necesario
+    fun clearMemoryCache() {
+        cachedPokemonList = null
+        pokemonDetailsCache.clear()
+        lastPokemonListFetchTime = 0
+        Log.d("PokemonRepository", "In-memory cache cleared")
     }
 
     // Funciones para manejar la caché
@@ -85,7 +128,7 @@ class PokemonRepository(
                 withContext(Dispatchers.IO) {
                     cacheDao.insertPokemon(pokemonCache)
                 }
-                Log.d("PokemonRepository", "Saved ${detailResponse.name} to cache")
+                Log.d("PokemonRepository", "Saved ${detailResponse.name} to database cache")
             } catch (e: Exception) {
                 Log.e("PokemonRepository", "Error saving to cache", e)
             }
