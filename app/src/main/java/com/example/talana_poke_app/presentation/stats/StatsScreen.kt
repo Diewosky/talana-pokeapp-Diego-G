@@ -143,13 +143,6 @@ fun StatsScreen(
                 color = Color(0xFF66BB6A) // Verde para el tiempo
             )
             
-            PixelatedStatsCard(
-                title = "Última Actualización",
-                value = formatDate(usageStats.lastUpdated),
-                description = "Fecha de la última actualización",
-                color = Color(0xFF9E9E9E) // Gris para la fecha
-            )
-            
             Spacer(modifier = Modifier.height(16.dp))
             
             PixelatedButton(

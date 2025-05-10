@@ -31,6 +31,17 @@ class PokemonViewModel @Inject constructor(
     
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+    
+    // Nuevo: estado para el filtro de tipo
+    private val _selectedType = MutableStateFlow<String?>(null)
+    val selectedType: StateFlow<String?> = _selectedType.asStateFlow()
+    
+    // Lista de todos los tipos de Pokémon disponibles
+    val availableTypes = listOf(
+        "Normal", "Fire", "Water", "Electric", "Grass", "Ice", 
+        "Fighting", "Poison", "Ground", "Flying", "Psychic", 
+        "Bug", "Rock", "Ghost", "Dragon", "Dark", "Steel", "Fairy"
+    )
 
     private val _userId = MutableStateFlow<String?>(null)
     val userId: StateFlow<String?> = _userId.asStateFlow()
@@ -45,6 +56,11 @@ class PokemonViewModel @Inject constructor(
     
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
+    }
+    
+    // Nuevo: actualizar filtro por tipo
+    fun updateTypeFilter(type: String?) {
+        _selectedType.value = type
     }
 
     private var observeJob: kotlinx.coroutines.Job? = null
@@ -69,14 +85,29 @@ class PokemonViewModel @Inject constructor(
                 }
                 updatedList
             }
-            pokemonDataFlow.combine(_searchQuery) { pokemonList, searchTerm ->
-                if (searchTerm.isBlank()) {
-                    pokemonList
-                } else {
-                    pokemonList.filter {
+            // Combinar con búsqueda y filtro de tipo
+            combine(
+                pokemonDataFlow,
+                _searchQuery,
+                _selectedType
+            ) { pokemonList, searchTerm, selectedType ->
+                var filteredList = pokemonList
+                
+                // Filtrar por término de búsqueda
+                if (searchTerm.isNotBlank()) {
+                    filteredList = filteredList.filter {
                         it.name.contains(searchTerm, ignoreCase = true)
                     }
                 }
+                
+                // Filtrar por tipo seleccionado
+                if (selectedType != null) {
+                    filteredList = filteredList.filter { pokemon ->
+                        pokemon.types?.any { it.equals(selectedType, ignoreCase = true) } == true
+                    }
+                }
+                
+                filteredList
             }
             .collect { filteredList ->
                 _uiState.update {
@@ -84,7 +115,9 @@ class PokemonViewModel @Inject constructor(
                         isLoading = false,
                         pokemonList = filteredList,
                         error = if (filteredList.isEmpty() && !it.isLoading) {
-                            if (_searchQuery.value.isNotBlank()) "No se encontraron resultados para: ${_searchQuery.value}" else "No Pokémon found."
+                            if (_searchQuery.value.isNotBlank() || _selectedType.value != null) {
+                                "No se encontraron resultados con los filtros aplicados"
+                            } else "No Pokémon found."
                         } else it.error
                     )
                 }

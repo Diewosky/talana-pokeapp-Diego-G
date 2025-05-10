@@ -3,6 +3,7 @@ package com.example.talana_poke_app.presentation.pokemonlist
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -198,6 +199,16 @@ fun PokemonListScreen(
                             )
                         }
                     }
+                    
+                    // Añadir filtro por tipo
+                    TypeFilterChips(
+                        availableTypes = pokemonViewModel.availableTypes,
+                        selectedType = pokemonViewModel.selectedType.collectAsState().value,
+                        onTypeSelected = { pokemonViewModel.updateTypeFilter(it) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
                 }
             } else {
                 // Barra superior para Favoritos (solo roja sin búsqueda)
@@ -763,6 +774,85 @@ fun TypeChip(typeName: String) {
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.5.sp
         )
+    }
+}
+
+@Composable
+fun TypeFilterChips(
+    availableTypes: List<String>,
+    selectedType: String?,
+    onTypeSelected: (String?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // Scroll horizontal para los chips de tipo
+    Row(
+        modifier = modifier
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        // Chip "Todos" para resetear el filtro
+        FilterChip(
+            selected = selectedType == null,
+            onClick = { onTypeSelected(null) },
+            modifier = Modifier
+                .border(
+                    width = 2.dp,
+                    color = Color.Black,
+                    shape = RoundedCornerShape(0.dp)
+                )
+                .clip(RoundedCornerShape(0.dp)),
+            shape = RoundedCornerShape(0.dp),
+            colors = FilterChipDefaults.filterChipColors(
+                containerColor = Color.White,
+                selectedContainerColor = PokemonRed,
+                labelColor = Color.Black,
+                selectedLabelColor = Color.White,
+            ),
+            label = {
+                Text(
+                    "Todos",
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+            },
+            border = null
+        )
+        
+        // Chips para cada tipo
+        availableTypes.forEach { type ->
+            FilterChip(
+                selected = selectedType == type,
+                onClick = { 
+                    if (selectedType == type) {
+                        onTypeSelected(null) // Deseleccionar
+                    } else {
+                        onTypeSelected(type) // Seleccionar
+                    }
+                },
+                modifier = Modifier
+                    .border(
+                        width = 2.dp,
+                        color = Color.Black,
+                        shape = RoundedCornerShape(0.dp)
+                    )
+                    .clip(RoundedCornerShape(0.dp)),
+                shape = RoundedCornerShape(0.dp),
+                colors = FilterChipDefaults.filterChipColors(
+                    containerColor = getTypeColor(type).copy(alpha = 0.3f),
+                    selectedContainerColor = getTypeColor(type),
+                    labelColor = Color.Black,
+                    selectedLabelColor = Color.White,
+                ),
+                label = {
+                    Text(
+                        type,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
+                },
+                border = null
+            )
+        }
     }
 }
 
