@@ -5,97 +5,118 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.talana_poke_app.data.local.AppDatabase
+import com.example.talana_poke_app.data.model.PokemonListItem
 import com.example.talana_poke_app.data.repository.PokemonRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PokemonViewModel(application: Application) : AndroidViewModel(application) {
 
     private val pokemonRepository: PokemonRepository
-    private val _triggerFetch = MutableStateFlow(Unit) // Para re-disparar la carga si es necesario
-
-    init {
-        val favoritePokemonDao = AppDatabase.getDatabase(application).favoritePokemonDao()
-        pokemonRepository = PokemonRepository(favoritePokemonDao = favoritePokemonDao)
-    }
-
-    private val _rawPokemonListFromApi = _triggerFetch.flatMapLatest {
-        _uiState.update { it.copy(isLoading = true, error = null) } // Indicar carga al inicio del fetch
-        flowOf(pokemonRepository.getPokemonList(20))
-            .map { initialList ->
-                // En una app real, las llamadas de detalle podrían ser más eficientes o diferidas
-                initialList.map { pokemonListItem ->
-                    val detail = pokemonRepository.getPokemonDetail(pokemonListItem.url)
-                    PokemonDisplayItem(
-                        name = pokemonListItem.name,
-                        imageUrl = detail?.sprites?.frontDefault,
-                        detailUrl = pokemonListItem.url,
-                        isFavorite = false, // Será actualizado por el combine más tarde
-                        id = detail?.id,
-                        height = detail?.height,
-                        weight = detail?.weight,
-                        types = detail?.types?.map { it.type.name.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase() else char.toString() } },
-                        abilities = detail?.abilities?.map { it.ability.name.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase() else char.toString() } },
-                        stats = detail?.stats?.map { Pair(it.stat.name.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase() else char.toString() }, it.baseStat) }
-                    )
-                }
-            }
-            .catch { e ->
-                Log.e("PokemonViewModel", "Error fetching initial list/details", e)
-                _uiState.update { it.copy(isLoading = false, error = e.message ?: "Error fetching data") }
-                emit(emptyList()) 
-            }
-    }
-
-    private val _favoritePokemons = pokemonRepository.getAllFavoritePokemons()
-        .catch { e ->
-            Log.e("PokemonViewModel", "Error fetching favorites", e)
-            emit(emptyList()) 
-        }
+    private val _currentListType = MutableStateFlow(PokemonListType.ALL) // Default or initial type
 
     private val _uiState = MutableStateFlow(PokemonListUiState(isLoading = true))
     val uiState: StateFlow<PokemonListUiState> = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            combine(
-                _rawPokemonListFromApi,
-                _favoritePokemons
-            ) { pokemonFromApi, favoritesFromDb ->
-                val favoriteNames = favoritesFromDb.map { it.name }.toSet()
-                val updatedList = pokemonFromApi.map { displayItem ->
-                    displayItem.copy(isFavorite = favoriteNames.contains(displayItem.name))
-                }
-                // Solo actualiza isLoading a false si realmente tenemos una lista (o un error ya fue seteado)
-                val currentError = _uiState.value.error
-                val isLoading = pokemonFromApi.isEmpty() && currentError == null // Sigue cargando si la API no devolvió nada y no hay error previo
-                
-                Pair(updatedList, isLoading)
+        val database = AppDatabase.getDatabase(application)
+        val favoritePokemonDao = database.favoritePokemonDao()
+        val pokemonCacheDao = database.pokemonCacheDao()
+        
+        pokemonRepository = PokemonRepository(
+            favoritePokemonDao = favoritePokemonDao,
+            pokemonCacheDao = pokemonCacheDao
+        )
+        observePokemonData()
+    }
 
-            }.collect { (combinedList, stillLoading) -> 
+    fun loadPokemons(listType: PokemonListType) {
+        _currentListType.value = listType
+    }
+
+    private fun observePokemonData() {
+        viewModelScope.launch {
+            _currentListType.flatMapLatest { type ->
+                _uiState.update { it.copy(isLoading = true, error = null, pokemonList = emptyList()) } // Reset on type change
+                when (type) {
+                    PokemonListType.ALL -> fetchAllPokemonFromApi()
+                    PokemonListType.FAVORITES -> fetchFavoritePokemonDetails()
+                }
+            }.catch { e ->
+                Log.e("PokemonViewModel", "Error in pokemonDataFlow", e)
+                _uiState.update { it.copy(isLoading = false, error = e.message ?: "Error fetching data", pokemonList = emptyList()) }
+            }
+            .combine(pokemonRepository.getAllFavoritePokemons().catch { emit(emptyList()) }) { displayItems, dbFavorites ->
+                val favoriteNames = dbFavorites.map { it.name }.toSet()
+                val updatedList = displayItems.map {
+                    it.copy(isFavorite = favoriteNames.contains(it.name))
+                }
+                updatedList
+            }
+            .collect { combinedList ->
                 _uiState.update {
                     it.copy(
-                        isLoading = stillLoading,
+                        isLoading = false, // Loading is handled before this combine
                         pokemonList = combinedList,
-                        // Mantener error si ya existía, o poner uno nuevo si la lista está vacía y no hay error
-                        error = if (combinedList.isEmpty() && !stillLoading && it.error == null) "No Pokémon found." else it.error
+                        error = if (combinedList.isEmpty() && !it.isLoading) "No Pokémon found." else it.error
                     )
                 }
             }
         }
-         _triggerFetch.value = Unit // Inicia la carga explícitamente después de configurar el colector
     }
 
+    private fun fetchAllPokemonFromApi(): Flow<List<PokemonDisplayItem>> {
+        return flow { 
+            val initialList = pokemonRepository.getPokemonList(151)
+            
+            // Procesar hasta 10 Pokémon a la vez en paralelo
+            val pokemonDisplayItems = initialList.chunked(15).flatMap { chunk ->
+                chunk.map { pokemonListItem ->
+                    viewModelScope.async {
+                        mapToDisplayItem(pokemonListItem, pokemonListItem.url)
+                    }
+                }.awaitAll()
+            }
+            
+            emit(pokemonDisplayItems)
+        }
+    }
+
+    private fun fetchFavoritePokemonDetails(): Flow<List<PokemonDisplayItem>> {
+        return pokemonRepository.getAllFavoritePokemons()
+            .map { favoriteList ->
+                // Procesar favoritos en paralelo
+                favoriteList.map { favoritePokemon ->
+                    viewModelScope.async {
+                        mapToDisplayItem(
+                            PokemonListItem(favoritePokemon.name, favoritePokemon.detailUrl), 
+                            favoritePokemon.detailUrl, 
+                            favoritePokemon.imageUrl
+                        )
+                    }
+                }.awaitAll()
+            }
+    }
+
+    private suspend fun mapToDisplayItem(item: PokemonListItem, detailUrl: String, existingImageUrl: String? = null): PokemonDisplayItem {
+        val detail = pokemonRepository.getPokemonDetail(detailUrl)
+        return PokemonDisplayItem(
+            name = item.name,
+            imageUrl = existingImageUrl ?: detail?.sprites?.frontDefault,
+            detailUrl = detailUrl,
+            isFavorite = false,
+            id = detail?.id,
+            height = detail?.height,
+            weight = detail?.weight,
+            types = detail?.types?.map { it.type.name.replaceFirstChar(Char::titlecase) },
+            abilities = detail?.abilities?.map { it.ability.name.replaceFirstChar(Char::titlecase) },
+            stats = detail?.stats?.map { Pair(it.stat.name.replaceFirstChar(Char::titlecase), it.baseStat) }
+        )
+    }
 
     fun toggleFavorite(pokemon: PokemonDisplayItem) {
         viewModelScope.launch {
@@ -103,11 +124,11 @@ class PokemonViewModel(application: Application) : AndroidViewModel(application)
                 if (pokemon.isFavorite) {
                     pokemonRepository.removePokemonFromFavorites(pokemon.name)
                 } else {
-                    pokemonRepository.addPokemonToFavorites(pokemon.copy(isFavorite = true)) // Guardamos con isFavorite = true por consistencia, aunque la BD no lo use
+                    pokemonRepository.addPokemonToFavorites(pokemon)
                 }
             } catch (e: Exception) {
                 Log.e("PokemonViewModel", "Error toggling favorite", e)
-                // Considerar actualizar uiState con un error específico del toggle
+                _uiState.update { it.copy(error = "Error updating favorite status") }
             }
         }
     }

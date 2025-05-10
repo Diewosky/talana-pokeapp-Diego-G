@@ -76,6 +76,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx") // Firebase Authentication
     implementation("com.google.android.gms:play-services-auth:21.2.0") // Google Sign-In (check for latest version)
 
+    implementation(libs.androidx.navigation.compose) // Jetpack Navigation Compose
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
