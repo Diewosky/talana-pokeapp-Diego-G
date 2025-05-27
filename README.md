@@ -7,14 +7,14 @@ Una aplicación Android para explorar Pokémon, desarrollada con Kotlin y Jetpac
 ## 📱 Capturas de pantalla
 
 <div align="center">
-  <img src="app/src/main/res/capturas/login.png" alt="Login" width="250"/>
-  <img src="app/src/main/res/capturas/menu.png" alt="Menú Principal" width="250"/>
-  <img src="app/src/main/res/capturas/pokemones.png" alt="Lista de Pokémon" width="250"/>
-  <img src="app/src/main/res/capturas/infopoke1.png" alt="Detalle Pokémon 1" width="250"/>
-  <img src="app/src/main/res/capturas/infopoke2.png" alt="Detalle Pokémon 2" width="250"/>
-  <img src="app/src/main/res/capturas/fav.png" alt="Favoritos" width="250"/>
-  <img src="app/src/main/res/capturas/estadisticas.png" alt="Estadísticas" width="250"/>
-  <img src="app/src/main/res/capturas/iconoapp.png" alt="Icono App" width="100"/> 
+  <img src="screenshots/login.png" alt="Login" width="250"/>
+  <img src="screenshots/menu.png" alt="Menú Principal" width="250"/>
+  <img src="screenshots/pokemones.png" alt="Lista de Pokémon" width="250"/>
+  <img src="screenshots/infopoke1.png" alt="Detalle Pokémon 1" width="250"/>
+  <img src="screenshots/infopoke2.png" alt="Detalle Pokémon 2" width="250"/>
+  <img src="screenshots/fav.png" alt="Favoritos" width="250"/>
+  <img src="screenshots/estadisticas.png" alt="Estadísticas" width="250"/>
+  <img src="screenshots/iconoapp.png" alt="Icono App" width="100"/> 
 </div>
 
 ## 📥 Descarga directa
@@ -247,9 +247,9 @@ Para abordar este desafío, seguí un proceso iterativo centrado en la funcional
 
 Para añadir tus propias capturas de pantalla al README:
 
-1. Crea una carpeta llamada `capturas` dentro de `app/src/main/res/`
+1. Crea una carpeta llamada `screenshots` en la raíz del proyecto
    ```bash
-   mkdir -p app/src/main/res/capturas
+   mkdir -p screenshots
    ```
 
 2. Añade tus capturas de pantalla a esta carpeta (preferiblemente en formato PNG)
@@ -257,8 +257,8 @@ Para añadir tus propias capturas de pantalla al README:
 3. Edita la sección de capturas de pantalla en este README para referenciar tus imágenes:
    ```markdown
    <div align="center">
-     <img src="app/src/main/res/capturas/tu_captura1.png" alt="Descripción" width="250"/>
-     <img src="app/src/main/res/capturas/tu_captura2.png" alt="Descripción" width="250"/>
+     <img src="screenshots/tu_captura1.png" alt="Descripción" width="250"/>
+     <img src="screenshots/tu_captura2.png" alt="Descripción" width="250"/>
      // ... más imágenes ...
    </div>
    ```
